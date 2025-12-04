@@ -174,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: CircleAvatar(
               radius: 18, backgroundColor: Colors.grey[800],
               backgroundImage: (user?.photoURL != null) ? NetworkImage(user!.photoURL!) : null,
-              child: (user?.photoURL == null) ? Text(user?.displayName != null && user!.displayName!.isNotEmpty ? user!.displayName![0] : "?", style: const TextStyle(color: Colors.white)) : null
+              child: (user?.photoURL == null) ? Text(user != null && user.displayName != null && user.displayName!.isNotEmpty ? user.displayName![0] : "?", style: const TextStyle(color: Colors.white)) : null
             ),
           ),
         );

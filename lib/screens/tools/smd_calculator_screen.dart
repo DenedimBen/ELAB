@@ -100,16 +100,6 @@ class _SmdCalculatorScreenState extends State<SmdCalculatorScreen> {
     return "${ohms.toStringAsFixed(2).replaceAll('.00', '')} Ω";
   }
 
-  String _getSmdCodeText() {
-    if (mode == 96) {
-      return "$val1Idx$val2Idx${eiaLetterData[eiaLetterIdx]['text']}";
-    } else if (mode == 3) {
-      return "$val1Idx$val2Idx$val3Idx";
-    } else {
-      return "$val1Idx$val2Idx$val3Idx$val4Idx";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

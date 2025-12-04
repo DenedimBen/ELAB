@@ -141,13 +141,6 @@ class _ForumPostCard extends StatelessWidget {
     String? photo = data['authorPhoto'];
     String? postImage = data['imageUrl'];
     
-    // Oylama Verileri
-    List upvotes = data['upvotes'] ?? [];
-    List downvotes = data['downvotes'] ?? [];
-    int score = upvotes.length - downvotes.length;
-    bool isUpvoted = currentUser != null && upvotes.contains(currentUser!.uid);
-    bool isDownvoted = currentUser != null && downvotes.contains(currentUser!.uid);
-    
     // Öne Çıkarılmış mı?
     bool isPromoted = data['isPromoted'] ?? false;
 
