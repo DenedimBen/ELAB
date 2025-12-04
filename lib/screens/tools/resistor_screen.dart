@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
 
 class ResistorScreen extends StatefulWidget {
   const ResistorScreen({super.key});

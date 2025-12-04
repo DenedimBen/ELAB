@@ -18,6 +18,13 @@ import 'opamp_screen.dart';
 import 'capacitor_charge_screen.dart';
 import 'regulator_screen.dart';
 import 'ne555_screen.dart';
+import 'battery_screen.dart';
+import 'inductor_design_screen.dart';
+import 'voltage_drop_screen.dart';
+import 'pcb_width_screen.dart';
+import 'power_calculator_screen.dart';
+import 'wave_screen.dart';
+import 'adc_screen.dart';
 
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
@@ -41,13 +48,25 @@ class ToolsScreen extends StatelessWidget {
                 // HEADER
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(text.navTools.toUpperCase(), style: GoogleFonts.orbitron(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 2, shadows: [const BoxShadow(color: Colors.amber, blurRadius: 15)])),
-                      Text(text.calculationTools, style: TextStyle(color: Colors.grey[400], fontSize: 10, letterSpacing: 3)),
+                      // --- GERİ BUTONU (GERİ GELDİ) ---
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.grey),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      const SizedBox(width: 10),
+                      
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(text.catCalculators, style: GoogleFonts.orbitron(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 1)), // Başlığı değiştirdik
+                          Text(text.calculationTools, style: TextStyle(color: Colors.grey[400], fontSize: 10, letterSpacing: 3)),
+                        ],
+                      ),
                     ],
                   ),
+                
                 ),
 
                 const SizedBox(height: 10),
@@ -100,13 +119,76 @@ class ToolsScreen extends StatelessWidget {
                       // 13. VOLTAJ REGÜLATÖRÜ
                       _buildToolCard(context, title: "VOLTAJ\nREGÜLATÖRÜ", icon: Icons.tune, color: Colors.cyanAccent, destination: const RegulatorScreen()),
 
-                      // 14. YENİ: NE555 HESAPLAYICI
+                      // 14. YENİ: BOBİN TASARLA
+                      _buildToolCard(
+                        context,
+                        title: "BOBİN\nTASARLA",
+                        icon: Icons.gesture,
+                        color: Colors.orangeAccent,
+                        destination: const InductorDesignScreen(),
+                      ),
+
+                      // 15. YENİ: NE555 HESAPLAYICI
                       _buildToolCard(
                         context,
                         title: "NE555\nHESAPLA",
                         icon: Icons.timer,
                         color: Colors.tealAccent,
                         destination: const Ne555Screen(),
+                      ),
+
+                      // 16. YENİ: PİL ÖMRÜ
+                      _buildToolCard(
+                        context,
+                        title: "PİL ÖMRÜ\nHESAPLA",
+                        icon: Icons.battery_std,
+                        color: Colors.lightGreen,
+                        destination: const BatteryScreen(),
+                      ),
+
+                      // 17. YENİ: GERİLİM DÜŞÜMÜ
+                      _buildToolCard(
+                        context,
+                        title: "GERİLİM DÜŞÜMÜ\nHESAPLA",
+                        icon: Icons.flash_off,
+                        color: Colors.deepOrange,
+                        destination: const VoltageDropScreen(),
+                      ),
+
+                      // 18. YENİ: PCB YOL HESAPLA
+                      _buildToolCard(
+                        context,
+                        title: "PCB YOL\nGENİŞLİĞİ",
+                        icon: Icons.linear_scale,
+                        color: Colors.greenAccent,
+                        destination: const PcbWidthScreen(),
+                      ),
+
+                      // 19. YENİ: GÜÇ HESAPLAYICI
+                      _buildToolCard(
+                        context,
+                        title: "GÜÇ\nHESAPLA",
+                        icon: Icons.electric_bolt,
+                        color: Colors.yellowAccent,
+                        destination: const PowerCalculatorScreen(),
+                      ),
+
+                      // 20. YENİ: DALGA ANALİZÖRÜ
+                      _buildToolCard(
+                        context,
+                        title: "FREKANS &\nDALGA BOYU",
+                        icon: Icons.wifi_tethering,
+                        color: Colors.purpleAccent,
+                        destination: const WaveScreen(),
+                      ),
+
+                      // 21. YENİ: ADC ÇEVİRİCİ
+                      _buildToolCard(
+                        context,
+                        title: "ADC (ANALOG/DİJİTAL)\nÇEVİRİCİ",
+                        icon: Icons.data_object,
+                        color: Colors.orangeAccent,
+                        destination: const AdcScreen(),
                       ),
                     ],
                   ),

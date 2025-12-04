@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart'; // Resimler için
 import 'package:timeago/timeago.dart' as timeago; // Zaman için
 import '../../services/firestore_service.dart';

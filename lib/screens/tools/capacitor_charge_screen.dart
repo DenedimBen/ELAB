@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
-import 'dart:ui' as ui;
 
 class CapacitorChargeScreen extends StatefulWidget {
   const CapacitorChargeScreen({super.key});

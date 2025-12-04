@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
 import 'dart:ui' as ui; // <-- İŞTE BU EKSİKTİ (Animasyon için şart)
 
 class OpAmpScreen extends StatefulWidget {
