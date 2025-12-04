@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/locale_provider.dart';
+import '../../providers/pro_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -10,6 +11,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<LocaleProvider>(context);
+    final proProvider = Provider.of<ProProvider>(context);
     final text = AppLocalizations.of(context)!; // Çeviri nesnesi
 
     return Scaffold(
@@ -33,6 +35,50 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // --- PRO ÜYELİK KARTI ---
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFFFFD700), Color(0xFFFFA000)]), // Altın Rengi
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [BoxShadow(color: Colors.amber.withValues(alpha: 0.4), blurRadius: 15)]
+              ),
+              child: Row(
+                children: [
+                  Icon(proProvider.isPro ? Icons.verified : Icons.diamond, size: 40, color: Colors.black),
+                  const SizedBox(width: 15),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        proProvider.isPro ? "PRO ÜYESİNİZ" : "PRO SÜRÜME GEÇ",
+                        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Text(
+                        proProvider.isPro ? "Reklamlar Kapalı 🚀" : "Reklamları Kaldır & Destekle",
+                        style: const TextStyle(color: Colors.black87, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  if (!proProvider.isPro)
+                    ElevatedButton(
+                      onPressed: () => proProvider.activatePro(), // Satın Al (Simülasyon)
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white),
+                      child: const Text("AL"),
+                    )
+                  else
+                    // Test Amaçlı: İptal Et Butonu (Normalde kullanıcıda olmaz)
+                    IconButton(
+                       icon: const Icon(Icons.restore, color: Colors.black54),
+                       onPressed: () => proProvider.deactivatePro(),
+                    )
+                ],
+              ),
+            ),
+            // -----------------------
+
             // DİL SEÇİM KUTUSU
             Container(
               padding: const EdgeInsets.all(15),

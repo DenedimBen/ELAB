@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'providers/locale_provider.dart';
+import 'providers/pro_provider.dart';
 
 void main() async {
   print("1. Uygulama Başlatılıyor...");
@@ -19,10 +21,16 @@ void main() async {
     print("Firebase hatası (normal olabilir): $e");
   }
   
-  print("4. Arayüz Çiziliyor...");
+  print("4. AdMob Başlatılıyor...");
+  MobileAds.instance.initialize();
+  
+  print("5. Arayüz Çiziliyor...");
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => LocaleProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LocaleProvider()),
+        ChangeNotifierProvider(create: (context) => ProProvider()),
+      ],
       child: const MyApp(),
     ),
   );

@@ -46,14 +46,15 @@ class FirestoreService {
   // --- YENİ: TOPLULUK (COMMUNITY) FONKSİYONLARI ---
   // ==================================================
 
-  // 1. Yeni Gönderi Ekle
-  Future<void> addPost(String title, String content) async {
+  // 1. Yeni Gönderi Ekle (Resim destekli)
+  Future<void> addPost(String title, String content, {String? imageUrl}) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
     await _db.collection('posts').add({
       'title': title,
       'content': content,
+      'imageUrl': imageUrl,
       'authorName': user.displayName ?? 'Anonim',
       'authorId': user.uid,
       'authorPhoto': user.photoURL,

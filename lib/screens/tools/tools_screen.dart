@@ -8,6 +8,7 @@ import '../smd/smd_screen.dart';       // SMD Dedektif (Veritabanı Arama)
 import 'smd_calculator_screen.dart';   // <-- YENİ: SMD Direnç Hesaplayıcı (Matematiksel)
 import 'inductor_screen.dart';          // <-- YENİ: İndüktör Renk Kodu
 import 'value_to_code_screen.dart';    // <-- YENİ: Değer -> Kod Çevirici
+import 'led_screen.dart';              // <-- YENİ: LED Direnç Hesaplayıcı
 
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
@@ -102,6 +103,15 @@ class ToolsScreen extends StatelessWidget {
                         icon: Icons.swap_horiz, // Değişim ikonu
                         color: Colors.orangeAccent,
                         destination: const ValueToCodeScreen(),
+                      ),
+
+                      // 6. YENİ EKLENEN: LED DİRENÇ HESAPLAYICI
+                      _buildToolCard(
+                        context,
+                        title: "LED DİRENÇ\nHESAPLA",
+                        icon: Icons.lightbulb_outline, 
+                        color: Colors.yellowAccent,
+                        destination: const LedScreen(),
                       ),
                     ],
                   ),

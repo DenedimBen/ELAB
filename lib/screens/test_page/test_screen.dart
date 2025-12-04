@@ -1,7 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../models/component_model.dart';
+import '../../providers/pro_provider.dart';
+import '../../services/ad_helper.dart';
 
 // ... (TestScreen class ve build metodu AYNI, değiştirmiyoruz) ...
 // Sadece _TestDialog kısmını tamamen değiştireceğiz.
@@ -97,9 +100,17 @@ class _TestDialogState extends State<_TestDialog> {
   String redProbeTarget = "--";
   String blackProbeTarget = "--";
 
+  // Reklam Yöneticisi
+  final AdHelper _adHelper = AdHelper();
+
   @override
   void initState() {
     super.initState();
+    
+    // Eğer kullanıcı PRO değilse reklamı önceden yükle
+    final isPro = Provider.of<ProProvider>(context, listen: false).isPro;
+    if (!isPro) _adHelper.loadInterstitial();
+    
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) _nextStepLogic();
     });
@@ -253,7 +264,15 @@ class _TestDialogState extends State<_TestDialog> {
   }
 
   void _showResult(bool isGood) {
-    Navigator.pop(context); 
+    Navigator.pop(context);
+    
+    // --- REKLAM KONTROLÜ ---
+    final isPro = Provider.of<ProProvider>(context, listen: false).isPro;
+    if (!isPro) {
+      _adHelper.showInterstitial(); // Reklamı Patlat!
+    }
+    // -----------------------
+    
     showDialog(
       context: context,
       barrierDismissible: false,
