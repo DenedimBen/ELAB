@@ -222,4 +222,39 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
   }
+
+  // ==================================================
+  // --- YENİ: OYUNLAŞTIRMA (XP SİSTEMİ) ---
+  // ==================================================
+
+  // Kullanıcıya XP Ekle
+  Future<void> addXP(int amount) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final userDoc = _db.collection('users').doc(user.uid);
+
+    // Transaction ile güvenli artırma (Çakışmayı önler)
+    await _db.runTransaction((transaction) async {
+      final snapshot = await transaction.get(userDoc);
+      
+      if (!snapshot.exists) {
+        // İlk kez XP kazanıyorsa döküman oluştur
+        transaction.set(userDoc, {'xp': amount});
+      } else {
+        int currentXP = snapshot.data().toString().contains('xp') ? snapshot.get('xp') : 0;
+        transaction.update(userDoc, {'xp': currentXP + amount});
+      }
+    });
+  }
+
+  // Kullanıcının XP'sini Dinle
+  Stream<int> getUserXP(String userId) {
+    return _db.collection('users').doc(userId).snapshots().map((doc) {
+      if (doc.exists && doc.data().toString().contains('xp')) {
+        return doc.get('xp') as int;
+      }
+      return 0; // Hiç puanı yoksa 0
+    });
+  }
 }

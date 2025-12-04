@@ -37,9 +37,13 @@ class _AddProjectScreenState extends State<AddProjectScreen> {
         imageUrl = await StorageService().uploadImage(_selectedImage!);
       }
       await FirestoreService().addPost(_titleController.text.trim(), _contentController.text.trim(), imageUrl: imageUrl);
+      
+      // XP KAZANDIR: Gönderi Paylaşmak +50 XP
+      await FirestoreService().addXP(50);
+      
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Başarılı!"), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Başarılı! +50 XP"), backgroundColor: Colors.green));
       }
     } catch (e) {
       if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Hata: $e")));

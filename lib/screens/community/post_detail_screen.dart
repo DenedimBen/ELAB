@@ -22,6 +22,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   void _sendComment() async {
     if (_commentController.text.trim().isEmpty) return;
     await FirestoreService().addComment(widget.postId, _commentController.text.trim());
+    
+    // XP KAZANDIR: Yorum Yapmak +20 XP
+    await FirestoreService().addXP(20);
+    
     _commentController.clear();
     // Listeyi aşağı kaydır
     Future.delayed(const Duration(milliseconds: 300), () {
