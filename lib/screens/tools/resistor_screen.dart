@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:math';
 
 class ResistorScreen extends StatefulWidget {
   const ResistorScreen({super.key});
@@ -8,7 +9,7 @@ class ResistorScreen extends StatefulWidget {
   State<ResistorScreen> createState() => _ResistorScreenState();
 }
 
-class _ResistorScreenState extends State<ResistorScreen> {
+class _ResistorScreenState extends State<ResistorScreen> with SingleTickerProviderStateMixin {
   // --- DURUM DEĞİŞKENLERİ ---
   int bandCount = 4;
 
@@ -19,7 +20,26 @@ class _ResistorScreenState extends State<ResistorScreen> {
   int tolerance = 10; // Altın
   int ppm = 1; // Kahve
 
-  // RENK VERİTABANI (TÜRKÇE İSİMLER EKLENDİ)
+  // ANİMASYON KONTROLCÜSÜ
+  late AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sonsuz döngüde çalışan animasyon (5 saniyede bir tur)
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  // RENK VERİTABANI
   final List<Map<String, dynamic>> colors = [
     {'name': 'Siyah',   'color': const Color(0xFF000000), 'val': 0, 'mult': 1.0, 'tol': null, 'ppm': 250},
     {'name': 'Kahve',   'color': const Color(0xFF795548), 'val': 1, 'mult': 10.0, 'tol': 1.0, 'ppm': 100},
@@ -38,13 +58,11 @@ class _ResistorScreenState extends State<ResistorScreen> {
   // --- HESAPLAMA MOTORU ---
   String calculateResistance() {
     double baseVal = 0;
-    
     if (bandCount == 4) {
       baseVal = (colors[digit1]['val'] * 10 + colors[digit2]['val']).toDouble();
     } else {
       baseVal = (colors[digit1]['val'] * 100 + colors[digit2]['val'] * 10 + colors[digit3]['val']).toDouble();
     }
-
     double totalOhms = baseVal * colors[multiplier]['mult'];
     return _formatOhms(totalOhms);
   }
@@ -68,16 +86,32 @@ class _ResistorScreenState extends State<ResistorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Arka plan rengi çarpan rengine göre hafif değişsin (Dinamik Atmosfer)
+    Color themeColor = colors[multiplier]['color'];
+    if (themeColor == Colors.black) themeColor = Colors.white; // Siyahsa beyaz yap
+
     return Scaffold(
       backgroundColor: const Color(0xFF2E3239),
       body: Stack(
         children: [
-          CustomPaint(size: Size.infinite, painter: GridPainter()),
+          // 1. CANLI ARKA PLAN (SCIFI GRID)
+          AnimatedBuilder(
+            animation: _animController,
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size.infinite,
+                painter: ResistorFlowPainter(
+                  animationValue: _animController.value,
+                  color: themeColor,
+                ),
+              );
+            },
+          ),
 
           SafeArea(
             child: Column(
               children: [
-                // 1. HEADER
+                // HEADER
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   child: Row(
@@ -87,12 +121,12 @@ class _ResistorScreenState extends State<ResistorScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 10),
-                      Text("DIRENC HESAPLAYICI", style: GoogleFonts.orbitron(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 1)),
+                      Text("DİRENÇ HESAPLAYICI", style: GoogleFonts.orbitron(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 1)),
                     ],
                   ),
                 ),
 
-                // 2. MOD SEÇİCİ
+                // MOD SEÇİCİ
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.all(5),
@@ -121,10 +155,10 @@ class _ResistorScreenState extends State<ResistorScreen> {
 
                 const SizedBox(height: 20),
 
-                // 3. SONUÇ EKRANI
+                // SONUÇ EKRANI
                 Column(
                   children: [
-                    Text(calculateResistance(), style: GoogleFonts.shareTechMono(fontSize: 60, color: Colors.white, fontWeight: FontWeight.bold, shadows: [const BoxShadow(color: Colors.white24, blurRadius: 15)])),
+                    Text(calculateResistance(), style: GoogleFonts.shareTechMono(fontSize: 60, color: Colors.white, fontWeight: FontWeight.bold, shadows: [BoxShadow(color: themeColor.withValues(alpha: 0.5), blurRadius: 30)])),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -140,7 +174,7 @@ class _ResistorScreenState extends State<ResistorScreen> {
 
                 const SizedBox(height: 20),
 
-                // 4. DİRENÇ GÖRSELİ
+                // DİRENÇ GÖRSELİ
                 Center(
                   child: SizedBox(
                     width: 320, height: 100,
@@ -179,7 +213,7 @@ class _ResistorScreenState extends State<ResistorScreen> {
                   ),
                 ),
 
-                // 5. SEÇİM PANELLERİ
+                // SEÇİM PANELLERİ
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.only(top: 30),
@@ -195,7 +229,7 @@ class _ResistorScreenState extends State<ResistorScreen> {
                         _buildColorRow("1. BANT", digit1, (v) => setState(() => digit1 = v), limit: 9),
                         _buildColorRow("2. BANT", digit2, (v) => setState(() => digit2 = v), limit: 9),
                         if (bandCount > 4) _buildColorRow("3. BANT", digit3, (v) => setState(() => digit3 = v), limit: 9),
-                        _buildColorRow("CARPAN", multiplier, (v) => setState(() => multiplier = v), limit: 11),
+                        _buildColorRow("ÇARPAN", multiplier, (v) => setState(() => multiplier = v), limit: 11),
                         _buildColorRow("TOLERANS", tolerance, (v) => setState(() => tolerance = v), isTolerance: true),
                         if (bandCount == 6) _buildColorRow("PPM (Temp)", ppm, (v) => setState(() => ppm = v), isPPM: true),
                       ],
@@ -214,7 +248,6 @@ class _ResistorScreenState extends State<ResistorScreen> {
     return Container(width: 12, height: 70, color: color);
   }
 
-  // GÜNCELLENMİŞ RENK SATIRI (İSİMLER EKLENDİ)
   Widget _buildColorRow(String title, int selectedIdx, Function(int) onSelect, {int limit = 12, bool isTolerance = false, bool isPPM = false}) {
     List<int> validIndices = [];
     if (isTolerance) {
@@ -235,7 +268,7 @@ class _ResistorScreenState extends State<ResistorScreen> {
             child: Text(title, style: TextStyle(color: Colors.grey[500], fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ),
           SizedBox(
-            height: 60, // Yüksekliği artırdım (Yazı sığsın diye)
+            height: 60,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: validIndices.length,
@@ -250,28 +283,20 @@ class _ResistorScreenState extends State<ResistorScreen> {
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     child: Column(
                       children: [
-                        // RENK TOPU
                         Container(
                           width: 35, height: 35,
                           decoration: BoxDecoration(
                             color: colors[colorIdx]['color'],
                             shape: BoxShape.circle,
-                            border: isSelected 
-                              ? Border.all(color: Colors.white, width: 2) 
-                              : (isWhite ? Border.all(color: Colors.grey) : null),
+                            border: isSelected ? Border.all(color: Colors.white, width: 2) : (isWhite ? Border.all(color: Colors.grey) : null),
                             boxShadow: isSelected ? [BoxShadow(color: colors[colorIdx]['color'].withValues(alpha: 0.6), blurRadius: 10)] : []
                           ),
                           child: isSelected ? const Icon(Icons.check, size: 20, color: Colors.grey) : null,
                         ),
                         const SizedBox(height: 4),
-                        // RENK İSMİ (YENİ)
                         Text(
                           colors[colorIdx]['name'],
-                          style: TextStyle(
-                            color: isSelected ? Colors.amber : Colors.grey[600], // Seçiliyse Parlak Sarı
-                            fontSize: 10,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
-                          ),
+                          style: TextStyle(color: isSelected ? Colors.amber : Colors.grey[600], fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
                         )
                       ],
                     ),
@@ -286,14 +311,49 @@ class _ResistorScreenState extends State<ResistorScreen> {
   }
 }
 
-class GridPainter extends CustomPainter {
+// --- SCIFI BACKGROUND PAINTER (AKIŞKAN IZGARA) ---
+class ResistorFlowPainter extends CustomPainter {
+  final double animationValue;
+  final Color color;
+  
+  ResistorFlowPainter({required this.animationValue, required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.03)..strokeWidth = 1;
-    const double step = 40.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.1)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final glowPaint = Paint()
+      ..color = color.withValues(alpha: 0.3)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+
+    const double gridSize = 40.0;
+
+    // Hareketli Dikey Çizgiler
+    for (double x = 0; x <= size.width; x += gridSize) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+
+    // Hareketli Yatay Çizgiler (Aşağı Doğru Akıyor)
+    // animationValue 0'dan 1'e gider. Bunu pixel offset'e çeviriyoruz.
+    double offsetY = animationValue * gridSize; 
+
+    for (double y = -gridSize; y <= size.height; y += gridSize) {
+      // Tarama Efekti: Ekranın ortasında daha parlak
+      double drawY = y + offsetY;
+      
+      // Eğer çizgi ekranın ortasına yakınsa parlat
+      if (drawY > size.height * 0.3 && drawY < size.height * 0.6) {
+        canvas.drawLine(Offset(0, drawY), Offset(size.width, drawY), glowPaint);
+      } else {
+        canvas.drawLine(Offset(0, drawY), Offset(size.width, drawY), paint);
+      }
+    }
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant ResistorFlowPainter oldDelegate) => true;
 }

@@ -2,7 +2,7 @@ import '../tools/smd_calculator_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../data/excel_service.dart';
 import '../../models/component_model.dart';
 import '../../utils/sound_manager.dart';

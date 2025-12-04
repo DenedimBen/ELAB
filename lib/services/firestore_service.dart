@@ -46,7 +46,7 @@ class FirestoreService {
   // --- YENİ: TOPLULUK (COMMUNITY) FONKSİYONLARI ---
   // ==================================================
 
-  // 1. Yeni Gönderi Ekle (Resim destekli)
+  // 1. Yeni Gönderi Ekle (Resim destekli + Oylama + Promosyon)
   Future<void> addPost(String title, String content, {String? imageUrl}) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -58,8 +58,12 @@ class FirestoreService {
       'authorName': user.displayName ?? 'Anonim',
       'authorId': user.uid,
       'authorPhoto': user.photoURL,
-      'timestamp': FieldValue.serverTimestamp(), // Sunucu saati
-      'likes': 0,
+      'timestamp': FieldValue.serverTimestamp(),
+      'upvotes': [],   // Beğenenlerin listesi (UID)
+      'downvotes': [], // Beğenmeyenlerin listesi (UID)
+      'isPromoted': false, // Öne çıkarılmış mı?
+      'promotedUntil': null, // Ne zamana kadar öne çıkacak?
+      'likes': 0, // Eski sistem (geriye dönük uyumluluk)
     });
   }
 
@@ -150,6 +154,71 @@ class FirestoreService {
 
   Stream<int> getLikeCount(String postId) {
     return _db.collection('posts').doc(postId).collection('likes')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
+  // ==================================================
+  // --- YENİ: OYLAMA SİSTEMİ (Reddit/Forum Tarzı) ---
+  // ==================================================
+
+  // 1. Oylama (+ veya - ile)
+  Future<void> votePost(String postId, bool isUpvote) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final docRef = _db.collection('posts').doc(postId);
+    
+    // Transaction kullanarak anlık çakışmaları önlüyoruz
+    await _db.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) return;
+
+      final data = snapshot.data();
+      List<dynamic> upvotes = List.from(data?['upvotes'] ?? []);
+      List<dynamic> downvotes = List.from(data?['downvotes'] ?? []);
+      String uid = user.uid;
+
+      if (isUpvote) {
+        // ARTI OY VERİLDİ
+        if (upvotes.contains(uid)) {
+          upvotes.remove(uid); // Zaten vermişse geri al
+        } else {
+          upvotes.add(uid);    // Ekle
+          downvotes.remove(uid); // Eksideyse oradan sil
+        }
+      } else {
+        // EKSİ OY VERİLDİ
+        if (downvotes.contains(uid)) {
+          downvotes.remove(uid); // Zaten vermişse geri al
+        } else {
+          downvotes.add(uid);    // Ekle
+          upvotes.remove(uid);   // Artıdaysa oradan sil
+        }
+      }
+
+      transaction.update(docRef, {
+        'upvotes': upvotes,
+        'downvotes': downvotes
+      });
+    });
+  }
+
+  // 2. ÖNE ÇIKARMA (BOOST)
+  Future<void> boostPost(String postId, int days) async {
+    // Gerçek uygulamada burada ödeme kontrolü yapılır
+    await _db.collection('posts').doc(postId).update({
+      'isPromoted': true,
+      'promotedUntil': DateTime.now().add(Duration(days: days)),
+    });
+  }
+
+  // 3. Bir gönderinin yorum sayısını dinle
+  Stream<int> getCommentCount(String postId) {
+    return _db
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
         .snapshots()
         .map((snapshot) => snapshot.docs.length);
   }

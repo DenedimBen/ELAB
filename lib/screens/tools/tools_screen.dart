@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/app_localizations.dart';
-// Araçların Ekranları
-import 'resistor_screen.dart';         // Renk Kodlu Direnç
-import 'capacitor_screen.dart';        // Kondansatör
-import '../smd/smd_screen.dart';       // SMD Dedektif (Veritabanı Arama)
-import 'smd_calculator_screen.dart';   // <-- YENİ: SMD Direnç Hesaplayıcı (Matematiksel)
-import 'inductor_screen.dart';          // <-- YENİ: İndüktör Renk Kodu
-import 'value_to_code_screen.dart';    // <-- YENİ: Değer -> Kod Çevirici
-import 'led_screen.dart';              // <-- YENİ: LED Direnç Hesaplayıcı
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // İstersen ekle
+import '../../l10n/generated/app_localizations.dart'; // Dil Destegi
+
+// --- ARAÇLARIN IMPORTLARI ---
+import 'resistor_screen.dart';
+import 'capacitor_screen.dart';
+import '../smd/smd_screen.dart';
+import 'smd_calculator_screen.dart';
+import 'inductor_screen.dart';
+import 'value_to_code_screen.dart';
+import 'ohms_law_screen.dart';
+import 'filter_screen.dart';
+import 'voltage_divider_screen.dart';
+import 'reactance_screen.dart';
+import 'opamp_screen.dart';
+import 'capacitor_charge_screen.dart';
+import 'regulator_screen.dart';
+import 'ne555_screen.dart';
 
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Dil çevirisi için (Hata verirse burayı geçici olarak kaldırabilirsin)
     final text = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFF2E3239),
       body: Stack(
@@ -28,14 +38,14 @@ class ToolsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // HEADER (Geri butonu yok)
+                // HEADER
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)!.navTools.toUpperCase(), style: GoogleFonts.orbitron(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 2, shadows: [const BoxShadow(color: Colors.amber, blurRadius: 15)])),
-                      Text(AppLocalizations.of(context)!.calculationTools, style: TextStyle(color: Colors.grey[400], fontSize: 10, letterSpacing: 3)),
+                      Text(text.navTools.toUpperCase(), style: GoogleFonts.orbitron(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 2, shadows: [const BoxShadow(color: Colors.amber, blurRadius: 15)])),
+                      Text(text.calculationTools, style: TextStyle(color: Colors.grey[400], fontSize: 10, letterSpacing: 3)),
                     ],
                   ),
                 ),
@@ -51,67 +61,52 @@ class ToolsScreen extends StatelessWidget {
                     mainAxisSpacing: 15,
                     childAspectRatio: 1.1, // Kareye yakın dikdörtgen
                     children: [
-                      // 1. DİRENÇ RENK KODU
-                      _buildToolCard(
-                        context,
-                        title: AppLocalizations.of(context)!.toolResistorCalc,
-                        icon: Icons.palette, 
-                        color: Colors.redAccent,
-                        destination: const ResistorScreen(),
-                      ),
+                      // 1. DİRENÇ RENK
+                      _buildToolCard(context, title: text.toolResistorCalc, icon: Icons.palette, color: Colors.redAccent, destination: const ResistorScreen()),
                       
                       // 2. KONDANSATÖR
-                      _buildToolCard(
-                        context,
-                        title: AppLocalizations.of(context)!.toolCapacitorDec,
-                        icon: Icons.battery_charging_full,
-                        color: Colors.greenAccent,
-                        destination: const CapacitorScreen(),
-                      ),
+                      _buildToolCard(context, title: text.toolCapacitorDec, icon: Icons.battery_charging_full, color: Colors.greenAccent, destination: const CapacitorScreen()),
                       
-                      // 3. SMD KOD DEDEKTİFİ (VERİTABANI ARAMA)
-                      _buildToolCard(
-                        context,
-                        title: AppLocalizations.of(context)!.toolSmdSearch,
-                        icon: Icons.qr_code_scanner,
-                        color: Colors.blueAccent,
-                        destination: const SmdScreen(),
-                      ),
+                      // 3. SMD KOD (DATABASE)
+                      _buildToolCard(context, title: text.toolSmdSearch, icon: Icons.qr_code_scanner, color: Colors.blueAccent, destination: const SmdScreen()),
 
-                      // 4. YENİ EKLENEN: SMD DİRENÇ HESAPLAYICI
-                      _buildToolCard(
-                        context,
-                        title: AppLocalizations.of(context)!.toolSmdCalc,
-                        icon: Icons.memory, // Çip ikonu
-                        color: Colors.purpleAccent,
-                        destination: const SmdCalculatorScreen(),
-                      ),
+                      // 4. SMD DİRENÇ HESAPLA
+                      _buildToolCard(context, title: text.toolSmdCalc, icon: Icons.memory, color: Colors.purpleAccent, destination: const SmdCalculatorScreen()),
 
-                      // 5. YENİ EKLENEN: İNDÜKTÖR RENK KODU
+                      // 5. İNDÜKTÖR
+                      _buildToolCard(context, title: text.toolInductorColor, icon: Icons.all_inclusive, color: Colors.tealAccent, destination: const InductorScreen()),
+
+                      // 6. DEĞER -> KOD
+                      _buildToolCard(context, title: text.toolValueToCode, icon: Icons.swap_horiz, color: Colors.orangeAccent, destination: const ValueToCodeScreen()),
+                      
+                      // 7. OHM KANUNU
+                      _buildToolCard(context, title: "OHM KANUNU\nHESAPLA", icon: Icons.flash_on, color: Colors.yellowAccent, destination: const OhmsLawScreen()),
+
+                      // 8. FİLTRE
+                      _buildToolCard(context, title: "FİLTRE (RC/RL)\nHESAPLA", icon: Icons.graphic_eq, color: Colors.cyanAccent, destination: const FilterScreen()),
+
+                      // 9. GERİLİM BÖLÜCÜ
+                      _buildToolCard(context, title: "GERİLİM\nBÖLÜCÜ", icon: Icons.call_split, color: Colors.deepOrangeAccent, destination: const VoltageDividerScreen()),
+
+                      // 10. REAKTANS / RL
+                      _buildToolCard(context, title: "REAKTANS &\nEMPEDANS", icon: Icons.waves, color: Colors.lightBlueAccent, destination: const ReactanceScreen()),
+
+                      // 11. OP-AMP
+                      _buildToolCard(context, title: "OP-AMP\nHESAPLA", icon: Icons.developer_board, color: Colors.pinkAccent, destination: const OpAmpScreen()),
+                      
+                      // 12. KONDANSATÖR ŞARJ (OSİLOSKOP)
+                      _buildToolCard(context, title: "RC ŞARJ\nSİMÜLATÖRÜ", icon: Icons.show_chart, color: Colors.lightGreenAccent, destination: const CapacitorChargeScreen()),
+
+                      // 13. VOLTAJ REGÜLATÖRÜ
+                      _buildToolCard(context, title: "VOLTAJ\nREGÜLATÖRÜ", icon: Icons.tune, color: Colors.cyanAccent, destination: const RegulatorScreen()),
+
+                      // 14. YENİ: NE555 HESAPLAYICI
                       _buildToolCard(
                         context,
-                        title: AppLocalizations.of(context)!.toolInductorColor,
-                        icon: Icons.all_inclusive, // Bobin benzeri ikon
+                        title: "NE555\nHESAPLA",
+                        icon: Icons.timer,
                         color: Colors.tealAccent,
-                        destination: const InductorScreen(),
-                      ),
-
-                      // 5. YENİ EKLENEN: DEĞER -> KOD ÇEVİRİCİ
-                      _buildToolCard(
-                        context,
-                        title: AppLocalizations.of(context)!.toolValueToCode,
-                        icon: Icons.swap_horiz, // Değişim ikonu
-                        color: Colors.orangeAccent,
-                        destination: const ValueToCodeScreen(),
-                      ),
-
-                      // 6. YENİ EKLENEN: LED DİRENÇ HESAPLAYICI
-                      _buildToolCard(
-                        context,
-                        title: "LED DİRENÇ\nHESAPLA",
-                        icon: Icons.lightbulb_outline, 
-                        color: Colors.yellowAccent,
-                        destination: const LedScreen(),
+                        destination: const Ne555Screen(),
                       ),
                     ],
                   ),
@@ -162,7 +157,7 @@ class ToolsScreen extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.orbitron(color: isLocked ? Colors.grey : Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1),
+              style: GoogleFonts.orbitron(color: isLocked ? Colors.grey : Colors.white, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1),
             ),
           ],
         ),

@@ -3,7 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'l10n/app_localizations.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'l10n/generated/app_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'providers/locale_provider.dart';
 import 'providers/pro_provider.dart';
@@ -11,6 +12,10 @@ import 'providers/pro_provider.dart';
 void main() async {
   print("1. Uygulama Başlatılıyor...");
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Timeago Locale Ayarları (Türkçe ve İngilizce) - DÜZELTİLDİ
+  timeago.setLocaleMessages('tr', timeago.TrMessages());
+  timeago.setLocaleMessages('en', timeago.EnMessages());
   
   print("2. Binding Hazır, Firebase Kontrol Ediliyor...");
   try {
