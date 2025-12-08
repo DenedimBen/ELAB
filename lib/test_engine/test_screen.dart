@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'test_scripts.dart';
 import 'component_visualizer.dart';
+import '../services/ad_service.dart';
 
 class ComponentTestScreen extends StatefulWidget {
   final String componentName; // "IRF3205"
@@ -58,12 +59,23 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
   void _showResultDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false, // Reklamı atlamasın diye
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF25282F),
         title: const Text("TEST TAMAMLANDI", style: TextStyle(color: Colors.greenAccent)),
         content: const Text("Tüm adımlar başarılıysa komponent SAĞLAMDIR. \n\nEğer herhangi bir adımda 'HAYIR' dediyseniz komponent ARIZALIDIR.", style: TextStyle(color: Colors.white)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Tamam"))
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Diyaloğu kapat
+              Navigator.pop(context); // Test ekranından çık
+              
+              // 💰 REKLAM GÖSTER (Zorla/Force) 💰
+              // Test bittiği için sayaca bakma, direkt göster
+              AdService().showInterstitialAd(force: true); 
+            },
+            child: const Text("Tamam"),
+          )
         ],
       ),
     );

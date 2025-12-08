@@ -11,6 +11,7 @@ class Component {
   final String description;
   final String datasheetUrl;
   final List<String> pinNames;
+  final String applications; // YENİ ALAN
 
   Component({
     required this.id,
@@ -25,6 +26,7 @@ class Component {
     required this.description,
     required this.datasheetUrl,
     required this.pinNames,
+    required this.applications,
   });
 
   // Excel Satırından Model Üretme
@@ -44,7 +46,7 @@ class Component {
 
     // Excel Sütun Sırasına Göre Okuma (Python kodumuzdaki sıraya sadık kalıyoruz)
     // 0:id, 1:category, 2:polarity, 3:package_id, 4:pinout_code, 
-    // 5:v_max, 6:i_max, 7:power_max, 8:test_script_id, 9:description, 10:url, 11:pin_names
+    // 5:v_max, 6:i_max, 7:power_max, 8:test_script_id, 9:description, 10:url, 11:pin_names, 12:applications
     
     return Component(
       id: getSafe(0),
@@ -59,6 +61,7 @@ class Component {
       description: getSafe(9),
       datasheetUrl: getSafe(10),
       pinNames: getSafe(11).split(','), // "G,D,S" -> ["G", "D", "S"]
+      applications: getSafe(12), // YENİ SÜTUNU OKU
     );
   }
 }

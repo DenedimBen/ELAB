@@ -272,4 +272,20 @@ class FirestoreService {
       return 0; // Hiç puanı yoksa 0
     });
   }
+
+  // --- YENİ: HATA RAPORLAMA SİSTEMİ 🐞 ---
+  Future<void> submitReport(String componentId, String reason, String description) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    await _db.collection('reports').add({
+      'componentId': componentId,
+      'reporterEmail': user.email, // Gönderen kişinin maili
+      'reporterId': user.uid,
+      'reason': reason, // "Yanlış Değer", "Resim Hatası" vb.
+      'description': description,
+      'status': 'open', // Rapor durumu
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
 }

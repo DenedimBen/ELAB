@@ -9,6 +9,7 @@ import 'l10n/generated/app_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'providers/locale_provider.dart';
 import 'providers/pro_provider.dart';
+import 'services/ad_service.dart';
 
 void main() async {
   print("1. Uygulama Başlatılıyor...");
@@ -40,7 +41,7 @@ void main() async {
   }
   
   print("4. AdMob Başlatılıyor...");
-  MobileAds.instance.initialize();
+  await AdService().init();
   
   print("5. Arayüz Çiziliyor...");
   runApp(
