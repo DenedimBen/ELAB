@@ -4,7 +4,8 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../data/excel_service.dart';
 import '../../models/component_model.dart';
 import '../../utils/sound_manager.dart';
-import '../test_page/test_screen.dart';
+import '../../test_engine/test_screen.dart'; // Yeni dosyanın yolu
+import '../component_detail_screen.dart'; // Detay ekranı importu
 import '../tools/resistor_screen.dart';
 import '../tools/capacitor_screen.dart';
 import 'category_screen.dart';
@@ -188,8 +189,24 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
         final comp = _searchResults[index];
         return GestureDetector(
           onTap: () {
-            SoundManager.playClick();
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TestScreen(component: comp)));
+            // DETAY EKRANINA GİT
+            Navigator.push(
+              context, 
+              MaterialPageRoute(
+                builder: (context) => ComponentDetailScreen(
+                  componentData: {
+                    'id': comp.id,
+                    'type': comp.category,
+                    'package': comp.packageId.isNotEmpty ? comp.packageId : 'TO-220',
+                    'vmax': comp.vMax.toString(),
+                    'imax': comp.iMax.toString(),
+                    'polarity': comp.polarity,
+                    'pinout_code': comp.pinoutCode,
+                    'test_script_id': comp.testScriptId,
+                  },
+                ),
+              ),
+            );
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 10),

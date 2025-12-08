@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/app_localizations.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../data/excel_service.dart';
 import '../../models/component_model.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/sound_manager.dart';
-import '../test_page/test_screen.dart';
+import '../../test_engine/test_screen.dart';
 import 'home_screen.dart'; // GridPainter için
 
 class FavoritesScreen extends StatefulWidget {
@@ -115,7 +115,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return GestureDetector(
       onTap: () {
         SoundManager.playClick();
-        Navigator.push(context, MaterialPageRoute(builder: (context) => TestScreen(component: comp)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ComponentTestScreen(
+          componentName: comp.id,
+          packageType: comp.packageId,
+          pinout: comp.pinoutCode.isNotEmpty ? comp.pinoutCode : 'GDS',
+          scriptId: comp.testScriptId.isNotEmpty ? comp.testScriptId : 'TEST_GENERIC',
+        )));
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),

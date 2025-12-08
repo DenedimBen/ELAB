@@ -38,8 +38,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // 3. YÖNLENDİRME MANTIĞI (DÜZELTİLDİ)
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        // Kullanıcı zaten içeride mi?
-        final user = FirebaseAuth.instance.currentUser;
+        User? user;
+        try {
+          // Firebase başlatılmadıysa burası hata verebilir
+          user = FirebaseAuth.instance.currentUser;
+        } catch (e) {
+          print("Splash: Firebase Auth erişim hatası (Web config eksik olabilir): $e");
+          user = null;
+        }
         
         if (user != null) {
           // Evet -> Ana Ekrana git

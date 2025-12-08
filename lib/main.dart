@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // kIsWeb için
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -19,11 +20,23 @@ void main() async {
   
   print("2. Binding Hazır, Firebase Kontrol Ediliyor...");
   try {
-    // Android'de google-services.json otomatik başlatır, web'de manuel başlatırız
-    await Firebase.initializeApp();
-    print("3. Firebase BAŞARILI!");
+    if (kIsWeb) {
+      print("Web platformu algılandı. Firebase config kontrol ediliyor...");
+      // Web için Firebase options gerekli. Eğer yoksa hata vermemesi için try-catch ile sarmalıyoruz.
+      // Not: Gerçek bir proje için firebase_options.dart kullanılmalıdır.
+      try {
+          await Firebase.initializeApp();
+          print("3. Firebase (Web) BAŞARILI!");
+      } catch (e) {
+          print("UYARI: Web için Firebase başlatılamadı (Config eksik olabilir). Uygulama devam ediyor... Hata: $e");
+      }
+    } else {
+      // Android/iOS için otomatik config
+      await Firebase.initializeApp();
+      print("3. Firebase (Mobil) BAŞARILI!");
+    }
   } catch (e) {
-    print("Firebase hatası (normal olabilir): $e");
+    print("Firebase genel hatası: $e");
   }
   
   print("4. AdMob Başlatılıyor...");

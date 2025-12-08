@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/excel_service.dart';
 import '../../models/component_model.dart';
-import '../test_page/test_screen.dart';
+import '../../test_engine/test_screen.dart';
 
 class SmdScreen extends StatefulWidget {
   const SmdScreen({super.key});
@@ -236,7 +236,14 @@ class _SmdScreenState extends State<SmdScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TestScreen(component: comp)),
+          MaterialPageRoute(
+            builder: (context) => ComponentTestScreen(
+              componentName: comp.id, // veya comp.code
+              packageType: "SOT-23", // SMD ekranındaysan kılıf genelde SOT-23'tür
+              pinout: "123", // Varsayılan
+              scriptId: "TEST_GENERIC",
+            )
+          ),
         );
       },
       child: Container(

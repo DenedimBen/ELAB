@@ -3,16 +3,14 @@ class Component {
   final String category;
   final String polarity;
   final String packageId;
-  final String pinoutCode;
+  final String pinoutCode; // YENİ
   final double vMax;
   final double iMax;
   final double powerMax;
-  final String testScriptId;
+  final String testScriptId; // YENİ
   final String description;
   final String datasheetUrl;
-  
-  // YENİ: PIN İSİMLERİ LİSTESİ
-  final List<String> pinNames; 
+  final List<String> pinNames;
 
   Component({
     required this.id,
@@ -29,48 +27,38 @@ class Component {
     required this.pinNames,
   });
 
+  // Excel Satırından Model Üretme
   factory Component.fromExcelRow(List<dynamic> row) {
-    dynamic getSafe(int index) {
-      if (index < row.length && row[index] != null) return row[index];
+    // Güvenli veri okuma (Boş gelirse hata vermesin)
+    String getSafe(int index) {
+      if (index < row.length && row[index] != null) return row[index].toString();
       return "";
     }
 
-    // Pin isimlerini virgül ile ayırıp listeye çeviriyoruz
-    String rawPins = getSafe(11).toString(); // Excel'deki sıraya göre (11. sütun pin_names ise)
-    // Python kodunda pin_names en sonda değil, aralarda olabilir.
-    // Güvenli okuma için Excel dosyasındaki sütun sırasını kontrol etmek en iyisidir.
-    // Bizim Python kodunda pin_names sonlarda. Tahmini index ayarlıyorum:
-    
-    // Components Data Sırası:
-    // 0:id, 1:cat, 2:pol, 3:pack, 4:pin_code, 5:v, 6:i, 7:p, 8:script, 9:desc, 10:man, 11:url, 12:PIN_NAMES
-    // (Python kodundaki sözlük sırasına göre Excel yazar, genelde alfabetik DEĞİLDİR, ekleme sırasıdır)
-    
-    // Düzeltme: Python'da 'pin_names' en sona eklendi. 
-    // Ama 'test_script_id' arada. 
-    // O yüzden String tabanlı map'leme yapmak daha güvenli olurdu ama şu an index ile gidiyoruz.
-    // description -> 9, manufacturer (yoksa) -> atla, pin_names -> 10 olabilir.
-    
-    // Basitlik için: Eğer pin_names alanı boş gelirse varsayılanları kullan.
-    List<String> pNames = [];
-    if (rawPins.contains(',')) {
-      pNames = rawPins.split(',').map((e) => e.trim()).toList();
-    } else {
-      pNames = ["1", "2", "3", "4", "5", "6", "7", "8"]; // Varsayılan
+    double getSafeDouble(int index) {
+      if (index < row.length && row[index] != null) {
+        return double.tryParse(row[index].toString()) ?? 0.0;
+      }
+      return 0.0;
     }
 
+    // Excel Sütun Sırasına Göre Okuma (Python kodumuzdaki sıraya sadık kalıyoruz)
+    // 0:id, 1:category, 2:polarity, 3:package_id, 4:pinout_code, 
+    // 5:v_max, 6:i_max, 7:power_max, 8:test_script_id, 9:description, 10:url, 11:pin_names
+    
     return Component(
-      id: getSafe(0).toString(),
-      category: getSafe(1).toString(),
-      polarity: getSafe(2).toString(),
-      packageId: getSafe(3).toString(),
-      pinoutCode: getSafe(4).toString(),
-      vMax: double.tryParse(getSafe(5).toString()) ?? 0.0,
-      iMax: double.tryParse(getSafe(6).toString()) ?? 0.0,
-      powerMax: double.tryParse(getSafe(7).toString()) ?? 0.0,
-      testScriptId: getSafe(8).toString(), // Sıra kaymış olabilir, kontrol et
-      description: getSafe(9).toString(),
-      datasheetUrl: "", // Şimdilik boş
-      pinNames: pNames,
+      id: getSafe(0),
+      category: getSafe(1),
+      polarity: getSafe(2),
+      packageId: getSafe(3),
+      pinoutCode: getSafe(4).isEmpty ? "123" : getSafe(4), // Boşsa varsayılan
+      vMax: getSafeDouble(5),
+      iMax: getSafeDouble(6),
+      powerMax: getSafeDouble(7),
+      testScriptId: getSafe(8).isEmpty ? "TEST_GENERIC" : getSafe(8), // Boşsa varsayılan
+      description: getSafe(9),
+      datasheetUrl: getSafe(10),
+      pinNames: getSafe(11).split(','), // "G,D,S" -> ["G", "D", "S"]
     );
   }
 }

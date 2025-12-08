@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../../test_engine/test_screen.dart'; // Test ekranı importu
 
 import 'component_menu_screen.dart'; 
 import '../knowledge/knowledge_screen.dart'; 
@@ -56,6 +57,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     children: [
+                      // HIZLI ARAMA KARTI
+                      GestureDetector(
+                        onTap: () {
+                          showSearch(context: context, delegate: ComponentSearchDelegate());
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [Color(0xFFC0392B), Color(0xFF8E44AD)]), // Kırmızı-Mor Ateşli Renk
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.search, color: Colors.white, size: 40),
+                              const SizedBox(width: 20),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("HIZLI SAĞLAMLIK TESTİ", style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const Text("Modeli yaz, testi başlat...", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                ],
+                              ),
+                              const Spacer(),
+                              const Icon(Icons.arrow_forward_ios, color: Colors.white54),
+                            ],
+                          ),
+                        ),
+                      ),
+
                       // A. DEVRE ELEMANLARI
                       _buildDashboardCard(
                         context,
@@ -193,4 +224,55 @@ class GridPainter extends CustomPainter {
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// SEARCH DELEGATE
+class ComponentSearchDelegate extends SearchDelegate {
+  // Örnek Liste - Normalde Excel Service'den gelecek
+  final List<String> components = ["IRF3205", "LM358", "NE555", "BC547", "1N4007"];
+
+  @override
+  List<Widget>? buildActions(BuildContext context) => [IconButton(icon: const Icon(Icons.clear), onPressed: () => query = '')];
+
+  @override
+  Widget? buildLeading(BuildContext context) => IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => close(context, null));
+
+  @override
+  Widget buildResults(BuildContext context) => Center(child: Text(query));
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final suggestions = components.where((element) => element.toLowerCase().contains(query.toLowerCase())).toList();
+    
+    return ListView.builder(
+      itemCount: suggestions.length,
+      itemBuilder: (context, index) {
+        final name = suggestions[index];
+        return ListTile(
+          title: Text(name),
+          subtitle: const Text("Testi Başlat"),
+          leading: const Icon(Icons.precision_manufacturing),
+          onTap: () {
+            // SEÇİLEN PARÇAYLA TESTİ BAŞLAT
+            String scriptId = "TEST_GENERIC";
+            if (name.contains("IRF")) scriptId = "TEST_MOS_N";
+            else if (name.contains("BC")) scriptId = "TEST_BJT_NPN";
+            else if (name.contains("78")) scriptId = "TEST_REGULATOR_FIXED";
+
+            Navigator.push(
+              context, 
+              MaterialPageRoute(
+                builder: (context) => ComponentTestScreen(
+                  componentName: name, 
+                  packageType: "TO-220",
+                  pinout: "GDS", // Varsayılan pinout
+                  scriptId: scriptId,
+                ) 
+              )
+            );
+          },
+        );
+      },
+    );
+  }
 }

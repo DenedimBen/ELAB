@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/component_model.dart';
-import '../test_page/test_screen.dart';
+import '../../test_engine/test_screen.dart'; // Yeni dosyanın yolu
+import '../component_detail_screen.dart'; // Detay ekranı importu
 import '../../utils/sound_manager.dart';
 
 class CategoryScreen extends StatelessWidget {
@@ -46,10 +47,23 @@ class CategoryScreen extends StatelessWidget {
           final comp = components[index];
           return GestureDetector(
             onTap: () {
-              SoundManager.playClick();
+              // DETAY EKRANINA GİT
               Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TestScreen(component: comp)),
+                context, 
+                MaterialPageRoute(
+                  builder: (context) => ComponentDetailScreen(
+                    componentData: {
+                      'id': comp.id,
+                      'type': comp.category,
+                      'package': comp.packageId.isNotEmpty ? comp.packageId : 'TO-220',
+                      'vmax': comp.vMax.toString(),
+                      'imax': comp.iMax.toString(),
+                      'polarity': comp.polarity,
+                      'pinout_code': comp.pinoutCode,
+                      'test_script_id': comp.testScriptId,
+                    },
+                  ),
+                ),
               );
             },
             child: Container(

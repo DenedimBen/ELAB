@@ -59,6 +59,8 @@ class FirestoreService {
       'authorId': user.uid,
       'authorPhoto': user.photoURL,
       'timestamp': FieldValue.serverTimestamp(),
+      'lastActivity': FieldValue.serverTimestamp(), // FORUM MANTIĞI: Son hareket tarihi
+      'viewCount': 0, // Görüntülenme sayısı
       'upvotes': [],   // Beğenenlerin listesi (UID)
       'downvotes': [], // Beğenmeyenlerin listesi (UID)
       'isPromoted': false, // Öne çıkarılmış mı?
@@ -70,8 +72,16 @@ class FirestoreService {
   // 2. Gönderileri Canlı Çek (En yeni en üstte)
   Stream<QuerySnapshot> getPosts() {
     return _db.collection('posts')
-        .orderBy('timestamp', descending: true)
+        .orderBy('lastActivity', descending: true)
         .snapshots();
+  }
+
+  // YENİ: Görüntülenme Sayısını Artır
+  Future<void> incrementViewCount(String postId) async {
+     // Anlık çok fazla yazma olmaması için basit bir artırma
+     await _db.collection('posts').doc(postId).update({
+       'viewCount': FieldValue.increment(1),
+     });
   }
 
   // 3. Gönderi Güncelle (Sadece başlık ve içerik)
@@ -104,6 +114,11 @@ class FirestoreService {
       'authorId': user.uid,
       'authorPhoto': user.photoURL,
       'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    // 2. Ana gönderinin "lastActivity" alanını güncelle (Konu yukarı çıkar)
+    await _db.collection('posts').doc(postId).update({
+      'lastActivity': FieldValue.serverTimestamp(),
     });
   }
 

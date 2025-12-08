@@ -16,24 +16,7 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  void _sendComment() async {
-    if (_commentController.text.trim().isEmpty) return;
-    await FirestoreService().addComment(widget.postId, _commentController.text.trim());
-    
-    // XP KAZANDIR: Yorum Yapmak +20 XP
-    await FirestoreService().addXP(20);
-    
-    _commentController.clear();
-    // Listeyi aşağı kaydır
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-      }
-    });
-  }
 
   // Resmi Tam Ekran Açma Fonksiyonu
   void _openFullScreenImage(String imageUrl) {
@@ -171,36 +154,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
 
           // --- 4. YORUM YAZMA ALANI (SABİT ALT) ---
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF202329),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 10, offset: const Offset(0, -5))]
-            ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(25), border: Border.all(color: Colors.white10)),
-                      child: TextField(
-                        controller: _commentController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(hintText: "Bir yorum yaz...", hintStyle: TextStyle(color: Colors.grey), border: InputBorder.none),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.amber,
-                    child: IconButton(icon: const Icon(Icons.send, color: Colors.black, size: 20), onPressed: _sendComment),
-                  )
-                ],
-              ),
-            ),
-          )
+          CommentInputArea(postId: widget.postId),
         ],
       ),
     );
@@ -237,6 +191,85 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 Text(content, style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.3)),
               ],
             ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// Bu widget'ı PostDetailScreen içinde yorum yazdığı input alanı yerine kullan
+class CommentInputArea extends StatefulWidget {
+  final String postId;
+  const CommentInputArea({super.key, required this.postId});
+
+  @override
+  State<CommentInputArea> createState() => _CommentInputAreaState();
+}
+
+class _CommentInputAreaState extends State<CommentInputArea> {
+  final _controller = TextEditingController();
+  bool _isSending = false; // KİLİT MEKANİZMASI 🔒
+
+  void _sendComment() async {
+    final content = _controller.text.trim();
+    if (content.isEmpty) return;
+
+    // 1. KİLİDİ AKTİF ET (Butona tekrar basılamaz)
+    setState(() => _isSending = true);
+
+    try {
+      // 2. Yorumu Gönder
+      await FirestoreService().addComment(widget.postId, content);
+      
+      // XP KAZANDIR: Yorum Yapmak +20 XP
+      await FirestoreService().addXP(20);
+
+      // 3. Başarılıysa Temizle
+      _controller.clear();
+      // Klavye açık kalsın mı kapansın mı? Genelde açık kalması iyidir.
+      // FocusScope.of(context).unfocus(); 
+      
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Hata: $e"), backgroundColor: Colors.red),
+      );
+    } finally {
+      // 4. KİLİDİ AÇ (Hata olsa bile kilit açılmalı ki tekrar deneyebilsin)
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      color: const Color(0xFF25282F),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: "Yorum yaz...",
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          IconButton(
+            // Eğer gönderiliyorsa butonu devre dışı bırak (null yap)
+            onPressed: _isSending ? null : _sendComment,
+            icon: _isSending 
+                ? const SizedBox( // Yükleniyor ikonu
+                    width: 20, 
+                    height: 20, 
+                    child: CircularProgressIndicator(color: Colors.amber, strokeWidth: 2)
+                  )
+                : const Icon(Icons.send, color: Colors.amber),
           )
         ],
       ),
