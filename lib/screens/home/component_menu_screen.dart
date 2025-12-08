@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/generated/app_localizations.dart';
 import '../../data/excel_service.dart';
 import '../../models/component_model.dart';
-import '../../utils/sound_manager.dart';
-import '../../test_engine/test_screen.dart'; // Yeni dosyanın yolu
-import '../component_detail_screen.dart'; // Detay ekranı importu
-import '../tools/resistor_screen.dart';
-import '../tools/capacitor_screen.dart';
-import 'category_screen.dart';
+import '../component_detail_screen.dart';
 
 class ComponentMenuScreen extends StatefulWidget {
   const ComponentMenuScreen({super.key});
@@ -18,24 +12,16 @@ class ComponentMenuScreen extends StatefulWidget {
 }
 
 class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
-  final ExcelService _service = ExcelService();
-  List<Component> _allComponents = [];
-  List<Component> _searchResults = [];
-  bool _isLoading = true;
-  bool _isSearching = false;
+  // Veri Yönetimi
+  List<Component> _allComponents = []; // Tüm liste (Önbellek)
+  List<Component> _filteredComponents = []; // Ekranda görünen liste
+  
+  // Arama ve Filtreleme
   final TextEditingController _searchController = TextEditingController();
+  String _selectedCategory = "Tümü";
+  final List<String> _categories = ["Tümü", "MOSFET", "BJT", "IC", "DIODE", "RESISTOR"];
 
-  List<Map<String, dynamic>> _getCategories(BuildContext context) {
-    final text = AppLocalizations.of(context)!;
-    return [
-      {'title': text.catTransistors, 'types': ['MOSFET', 'BJT', 'IGBT'], 'icon': Icons.memory, 'color': Colors.blue},
-      {'title': text.catDiodes, 'types': ['DIODE', 'ZENER', 'SCHOTTKY'], 'icon': Icons.flash_on, 'color': Colors.orange},
-      {'title': text.catRegulators, 'types': ['REGULATOR', 'LDO'], 'icon': Icons.settings_input_component, 'color': Colors.purple},
-      {'title': text.catCapacitors, 'types': ['CAP', 'ELCO'], 'icon': Icons.battery_charging_full, 'color': Colors.green},
-      {'title': text.catResistors, 'types': ['RES', 'VARISTOR'], 'icon': Icons.code, 'color': Colors.red},
-      {'title': text.catICs, 'types': ['IC', 'OPAMP'], 'icon': Icons.developer_board, 'color': Colors.cyan},
-    ];
-  }
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -43,191 +29,266 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
-    await _service.loadDatabase();
-    setState(() {
-      _allComponents = _service.allComponents;
-      _isLoading = false;
-    });
+  // Verileri Excel Servisinden Çek
+  void _loadData() async {
+    // ExcelService örneğini al
+    final service = ExcelService(); 
+    
+    // Verileri yükle
+    await service.loadDatabase();
+    
+    if (mounted) {
+      setState(() {
+        _allComponents = service.allComponents; // Servisteki ana liste
+        _filteredComponents = _allComponents;
+        _isLoading = false;
+      });
+    }
   }
 
-  void _runFilter(String keyword) {
-    if (keyword.isEmpty) {
-      setState(() => _isSearching = false);
-      return;
+  // 🔍 FİLTRELEME MOTORU
+  void _filterList(String query) {
+    List<Component> temp = [];
+
+    // 1. Adım: Kategori Filtresi
+    if (_selectedCategory == "Tümü") {
+      temp = _allComponents;
+    } else {
+      temp = _allComponents.where((c) => c.category.toUpperCase().contains(_selectedCategory)).toList();
     }
+
+    // 2. Adım: Arama Metni Filtresi
+    if (query.isNotEmpty) {
+      temp = temp.where((c) {
+        final id = c.id.toLowerCase();
+        final desc = c.description.toLowerCase();
+        final q = query.toLowerCase();
+        return id.contains(q) || desc.contains(q);
+      }).toList();
+    }
+
     setState(() {
-      _isSearching = true;
-      _searchResults = _allComponents
-          .where((comp) =>
-              comp.id.toLowerCase().contains(keyword.toLowerCase()) ||
-              comp.category.toLowerCase().contains(keyword.toLowerCase()))
-          .toList();
+      _filteredComponents = temp;
     });
-  }
-
-  void _openCategory(Map<String, dynamic> category) {
-    SoundManager.playClick();
-
-    if (category['title'].toString().contains(AppLocalizations.of(context)!.catResistors)) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const ResistorScreen()));
-      return;
-    }
-
-    if (category['title'].toString().contains(AppLocalizations.of(context)!.catCapacitors)) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const CapacitorScreen()));
-      return;
-    }
-
-    List<String> types = category['types'];
-    List<Component> filteredList = _allComponents.where((comp) {
-      return types.contains(comp.category.toUpperCase());
-    }).toList();
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CategoryScreen(
-          categoryTitle: category['title'],
-          components: filteredList,
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final text = AppLocalizations.of(context)!;
-    final categories = _getCategories(context);
-
     return Scaffold(
-      backgroundColor: const Color(0xFF2E3239),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(text.catComponents, style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold)),
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.grey), onPressed: () => Navigator.pop(context)),
-      ),
-      body: Column(
-        children: [
-          // Arama Çubuğu
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Container(
-              decoration: BoxDecoration(color: const Color(0xFF252930), borderRadius: BorderRadius.circular(15), boxShadow: const [BoxShadow(color: Colors.black54, offset: Offset(2, 2), blurRadius: 4)]),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _runFilter,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: text.searchHint,
-                  hintStyle: TextStyle(color: Colors.grey[600]),
-                  prefixIcon: const Icon(Icons.search, color: Colors.amber),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                ),
+      backgroundColor: const Color(0xFF121418), // Koyu Tema
+      body: SafeArea(
+        child: Column(
+          children: [
+            // --- ÜST BAŞLIK VE ARAMA ---
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E2126),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20)],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("VERİ BANKASI", style: GoogleFonts.teko(color: Colors.grey, fontSize: 14, letterSpacing: 2)),
+                  Text("Komponent Ara", style: GoogleFonts.orbitron(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  
+                  // ARAMA ÇUBUĞU
+                  TextField(
+                    controller: _searchController,
+                    onChanged: _filterList,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Örn: IRF3205, 7805...",
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      prefixIcon: const Icon(Icons.search, color: Colors.amber),
+                      suffixIcon: _searchController.text.isNotEmpty 
+                        ? IconButton(icon: const Icon(Icons.clear, color: Colors.grey), onPressed: () {
+                            _searchController.clear();
+                            _filterList('');
+                          }) 
+                        : null,
+                      filled: true,
+                      fillColor: Colors.black26,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  // KATEGORİ FİLTRELERİ (Yatay Liste)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _categories.map((cat) {
+                        bool isSelected = _selectedCategory == cat;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: FilterChip(
+                            label: Text(cat),
+                            selected: isSelected,
+                            onSelected: (bool selected) {
+                              setState(() {
+                                _selectedCategory = cat;
+                                _filterList(_searchController.text);
+                              });
+                            },
+                            backgroundColor: Colors.white10,
+                            selectedColor: Colors.amber,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.black : Colors.white70, 
+                              fontWeight: FontWeight.bold
+                            ),
+                            checkmarkColor: Colors.black,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide.none),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
 
-          // İçerik
-          Expanded(
-            child: _isLoading
+            // --- LİSTE ALANI ---
+            Expanded(
+              child: _isLoading 
                 ? const Center(child: CircularProgressIndicator(color: Colors.amber))
-                : _isSearching
-                    ? _buildSearchResults()
-                    : GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 1.3),
-                        itemCount: categories.length,
-                        itemBuilder: (context, index) {
-                          final cat = categories[index];
-                          return _buildCategoryCard(cat);
-                        },
-                      ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryCard(Map<String, dynamic> cat) {
-    return GestureDetector(
-      onTap: () => _openCategory(cat),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF353A40),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5))],
-          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF353A40), Color(0xFF2B2F36)])
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(color: (cat['color'] as Color).withValues(alpha: 0.1), shape: BoxShape.circle, boxShadow: [BoxShadow(color: (cat['color'] as Color).withValues(alpha: 0.2), blurRadius: 15)]),
-              child: Icon(cat['icon'], size: 30, color: cat['color']),
+                : _filteredComponents.isEmpty 
+                  ? _buildEmptyState() 
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(10),
+                      itemCount: _filteredComponents.length,
+                      itemBuilder: (context, index) {
+                        return _buildComponentCard(_filteredComponents[index]);
+                      },
+                    ),
             ),
-            const SizedBox(height: 15),
-            Text(cat['title'], style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSearchResults() {
-    if (_searchResults.isEmpty) {
-      return Center(child: Text("Sonuç Bulunamadı", style: TextStyle(color: Colors.grey[500])));
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final comp = _searchResults[index];
-        return GestureDetector(
-          onTap: () {
-            // DETAY EKRANINA GİT
-            Navigator.push(
-              context, 
-              MaterialPageRoute(
-                builder: (context) => ComponentDetailScreen(
-                  componentData: {
-                    'id': comp.id,
-                    'type': comp.category,
-                    'package': comp.packageId.isNotEmpty ? comp.packageId : 'TO-220',
-                    'vmax': comp.vMax.toString(),
-                    'imax': comp.iMax.toString(),
-                    'polarity': comp.polarity,
-                    'pinout_code': comp.pinoutCode,
-                    'test_script_id': comp.testScriptId,
-                  },
-                ),
-              ),
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: const Color(0xFF353A40),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white10),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.search, color: Colors.grey[600], size: 20),
-                const SizedBox(width: 15),
-                Text(comp.id, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                Text(comp.category, style: TextStyle(color: Colors.blue[300], fontSize: 12)),
-              ],
+  // --- KOMPONENT KARTI ---
+  Widget _buildComponentCard(Component comp) {
+    return GestureDetector(
+      onTap: () {
+        // DETAY EKRANINA GİT (VERİ TAŞIMA)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ComponentDetailScreen(
+              componentData: {
+                'id': comp.id,
+                'package': comp.packageId,
+                'category': comp.category,
+                'polarity': comp.polarity,
+                'vmax': comp.vMax,
+                'imax': comp.iMax,
+                'power_max': comp.powerMax,
+                'description': comp.description,
+                'pinout_code': comp.pinoutCode,
+                'test_script_id': comp.testScriptId,
+                'datasheet_url': comp.datasheetUrl,
+                'applications': comp.applications, // Akıllı veriler
+              },
             ),
           ),
         );
       },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E2126),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            // 1. KÜÇÜK RESİM KUTUSU
+            Container(
+              width: 60, height: 60,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Image.asset(
+                'assets/packages/${comp.packageId.toLowerCase()}.png',
+                fit: BoxFit.contain,
+                errorBuilder: (c, o, s) => const Icon(Icons.memory, color: Colors.grey),
+              ),
+            ),
+            
+            const SizedBox(width: 15),
+
+            // 2. BİLGİLER
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(comp.id, style: GoogleFonts.orbitron(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                        child: Text(comp.packageId, style: const TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    comp.category.toUpperCase(), 
+                    style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)
+                  ),
+                  const SizedBox(height: 4),
+                  // Teknik Özet (V/I)
+                  Row(
+                    children: [
+                      Icon(Icons.flash_on, size: 12, color: Colors.grey[500]),
+                      Text("${comp.vMax}V  ", style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                      Icon(Icons.bolt, size: 12, color: Colors.grey[500]),
+                      Text("${comp.iMax}A", style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // 3. OK İKONU
+            const Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- BOŞ DURUM (BULUNAMADI) ---
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 80, color: Colors.grey[800]),
+          const SizedBox(height: 20),
+          const Text("Sonuç Bulunamadı", style: TextStyle(color: Colors.grey, fontSize: 18)),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              // Google'da Ara
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.white10),
+            child: const Text("Google'da Ara", style: TextStyle(color: Colors.white)),
+          )
+        ],
+      ),
     );
   }
 }
