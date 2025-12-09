@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../../l10n/generated/app_localizations.dart'; // DIL PAKETI
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart'; // DIL PAKETI
 import '../../services/firestore_service.dart';
 import 'add_project_screen.dart';
 import 'post_detail_screen.dart';

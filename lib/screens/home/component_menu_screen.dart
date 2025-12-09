@@ -13,8 +13,8 @@ class ComponentMenuScreen extends StatefulWidget {
 
 class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
   // Veri Yönetimi
-  List<Component> _allComponents = []; // Tüm liste (Önbellek)
-  List<Component> _filteredComponents = []; // Ekranda görünen liste
+  List<ComponentModel> _allComponents = []; // Tüm liste (Önbellek)
+  List<ComponentModel> _filteredComponents = []; // Ekranda görünen liste
   
   // Arama ve Filtreleme
   final TextEditingController _searchController = TextEditingController();
@@ -48,7 +48,7 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
 
   // 🔍 FİLTRELEME MOTORU
   void _filterList(String query) {
-    List<Component> temp = [];
+    List<ComponentModel> temp = [];
 
     // 1. Adım: Kategori Filtresi
     if (_selectedCategory == "Tümü") {
@@ -173,7 +173,7 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
   }
 
   // --- KOMPONENT KARTI ---
-  Widget _buildComponentCard(Component comp) {
+  Widget _buildComponentCard(ComponentModel comp) {
     return GestureDetector(
       onTap: () {
         // DETAY EKRANINA GİT (VERİ TAŞIMA)

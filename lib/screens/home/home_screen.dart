@@ -1,235 +1,220 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../services/auth_service.dart';
-import '../../l10n/generated/app_localizations.dart';
-import '../../test_engine/test_screen.dart'; // Test ekranı importu
+// DİL DOSYASI (KESİN YOL)
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
+// DİĞER EKRANLAR (KESİN YOL)
+import 'package:flutter_application_1/screens/settings/settings_screen.dart';
+import 'package:flutter_application_1/screens/auth/profile_screen.dart';
+import 'package:flutter_application_1/test_engine/test_screen.dart';
+import 'package:flutter_application_1/screens/tools/tools_screen.dart';
+import 'package:flutter_application_1/screens/knowledge/knowledge_screen.dart';
+import 'package:flutter_application_1/screens/smd/smd_screen.dart';
+import 'package:flutter_application_1/screens/home/favorites_screen.dart';
+import 'package:flutter_application_1/models/component_model.dart'; // ComponentModel için
+import 'package:flutter_application_1/screens/component_detail_screen.dart'; // Detay ekranı için
 
-import 'component_menu_screen.dart'; 
-import '../knowledge/knowledge_screen.dart'; 
-import '../tools/tools_screen.dart'; // <-- ARAÇLAR MENÜSÜ BURAYA GELDİ
-import '../auth/login_screen.dart';
-
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     final text = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2E3239),
-      body: Stack(
-        children: [
-          CustomPaint(size: Size.infinite, painter: GridPainter()),
-
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. HEADER (Profil Resmi İle)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("E-LAB", style: GoogleFonts.orbitron(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 2, shadows: [const BoxShadow(color: Colors.amber, blurRadius: 15)])),
-                          Text("ELECTRONIC ASSISTANT", style: TextStyle(color: Colors.grey[400], fontSize: 10, letterSpacing: 3)),
-                        ],
-                      ),
-                      _buildProfileIcon(context),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 2. DASHBOARD (3 Büyük Kart)
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      // HIZLI ARAMA KARTI
-                      GestureDetector(
-                        onTap: () {
-                          showSearch(context: context, delegate: ComponentSearchDelegate());
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 20),
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFFC0392B), Color(0xFF8E44AD)]), // Kırmızı-Mor Ateşli Renk
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.search, color: Colors.white, size: 40),
-                              const SizedBox(width: 20),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("HIZLI SAĞLAMLIK TESTİ", style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                                  const Text("Modeli yaz, testi başlat...", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                                ],
-                              ),
-                              const Spacer(),
-                              const Icon(Icons.arrow_forward_ios, color: Colors.white54),
-                            ],
+      backgroundColor: const Color(0xFF1E2126),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 100), // Alt navigasyon için boşluk
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. HEADER (Profil ve Başlık)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(text.appTitle, style: GoogleFonts.orbitron(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 2)),
+                        const Text("v1.0.0 Pro", style: TextStyle(color: Colors.grey, fontSize: 10)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.settings, color: Colors.white70),
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())),
+                        ),
+                        const SizedBox(width: 5),
+                        GestureDetector(
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen())),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(colors: [Colors.amber, Colors.deepOrange]),
+                              boxShadow: [BoxShadow(color: Colors.amber.withOpacity(0.5), blurRadius: 10)]
+                            ),
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.grey[900],
+                              backgroundImage: (user?.photoURL != null) ? NetworkImage(user!.photoURL!) : null,
+                              child: (user?.photoURL == null) ? const Icon(Icons.person, color: Colors.white, size: 20) : null,
+                            ),
                           ),
                         ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 2. HIZLI TEST KARTI (Search)
+              GestureDetector(
+                onTap: () {
+                  showSearch(context: context, delegate: ComponentSearchDelegate(text));
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFFC0392B), Color(0xFF8E44AD)]),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [BoxShadow(color: Colors.purpleAccent.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search, color: Colors.white, size: 40),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(text.quickTestTitle, style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text(text.quickTestDesc, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                          ],
+                        ),
                       ),
-
-                      // A. DEVRE ELEMANLARI
-                      _buildDashboardCard(
-                        context,
-                        title: text.catComponents,
-                        subtitle: "Mosfet, BJT, Diyot ve Entegre Arşivi",
-                        icon: Icons.settings_input_component,
-                        color: Colors.blueAccent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ComponentMenuScreen())),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // B. HESAPLAYICILAR (YENİ YERİ)
-                      _buildDashboardCard(
-                        context,
-                        title: text.catCalculators, // "HESAPLAYICILAR"
-                        subtitle: text.calcDesc, // "Direnç, Güç, Bobin..."
-                        icon: Icons.calculate, // Hesap makinesi ikonu
-                        color: Colors.greenAccent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ToolsScreen())),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // C. BİLGİ BANKASI
-                      _buildDashboardCard(
-                        context,
-                        title: text.knowledgeBase,
-                        subtitle: "Formüller, Teoriler ve Pinoutlar",
-                        icon: Icons.menu_book,
-                        color: Colors.purpleAccent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const KnowledgeScreen())),
-                      ),
+                      const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              
+              const SizedBox(height: 30),
+              
+              // 3. KATEGORİ BAŞLIĞI
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(text.catCalculators, style: GoogleFonts.teko(color: Colors.grey, fontSize: 16, letterSpacing: 2)),
+              ),
+              
+              const SizedBox(height: 10),
+
+              // 4. ANA MENÜ GRID'İ (Araçlar, Bilgi, SMD)
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                childAspectRatio: 1.3,
+                children: [
+                  // ARAÇLAR (Hesaplayıcılar)
+                  _buildMenuCard(
+                    context,
+                    title: text.catCalculators,
+                    subtitle: text.calcDesc,
+                    icon: Icons.calculate,
+                    color: Colors.blueAccent,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ToolsScreen())),
+                  ),
+
+                  // BİLGİ BANKASI
+                  _buildMenuCard(
+                    context,
+                    title: text.knowledgeBase,
+                    subtitle: "Teori & Dersler",
+                    icon: Icons.menu_book,
+                    color: Colors.greenAccent,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const KnowledgeScreen())),
+                  ),
+
+                  // SMD KODLARI
+                  _buildMenuCard(
+                    context,
+                    title: text.kbSmdCodes,
+                    subtitle: "Kod Çözücü",
+                    icon: Icons.qr_code_scanner,
+                    color: Colors.orangeAccent,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SmdScreen())),
+                  ),
+
+                  // FAVORİLER (Kısayol)
+                  _buildMenuCard(
+                    context,
+                    title: text.myFavorites,
+                    subtitle: "Kaydedilenler",
+                    icon: Icons.favorite,
+                    color: Colors.redAccent,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritesScreen())), // Ana tab'e yönlendirilebilir ama direkt açmak daha hızlı
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildDashboardCard(BuildContext context, {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+  // YARDIMCI KART WIDGET'I
+  Widget _buildMenuCard(BuildContext context, {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 130, // Biraz küçülttük ki 3 tane rahat sığsın
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: const Color(0xFF2B2E36),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-          boxShadow: [BoxShadow(color: color.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 5))]
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.black26, shape: BoxShape.circle, border: Border.all(color: color.withValues(alpha: 0.5))),
-                    child: Icon(icon, size: 30, color: color),
-                  ),
-                ],
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: Icon(icon, color: color, size: 28),
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(title, style: GoogleFonts.orbitron(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 5),
-                  Text(subtitle, style: TextStyle(color: Colors.grey[400], fontSize: 11)),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Icon(Icons.arrow_forward_ios, color: color.withValues(alpha: 0.5)),
-            )
+            const Spacer(),
+            Text(title, style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+            Text(subtitle, style: TextStyle(color: Colors.grey[500], fontSize: 10)),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildProfileIcon(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        final user = snapshot.data;
-        return GestureDetector(
-          onTap: () {
-             showDialog(context: context, builder: (ctx) => AlertDialog(
-               backgroundColor: const Color(0xFF25282F),
-               title: const Text("Hesap", style: TextStyle(color: Colors.white)),
-               content: Text("Giriş: ${user?.email ?? 'Misafir'}", style: const TextStyle(color: Colors.grey)),
-               actions: [
-                 TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("İptal", style: TextStyle(color: Colors.grey))),
-                 TextButton(onPressed: () async {
-                   await AuthService().signOut();
-                   if(context.mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (r) => false);
-                 }, child: const Text("Çıkış", style: TextStyle(color: Colors.redAccent))),
-               ],
-             ));
-          },
-          child: Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.amber, width: 2)),
-            child: CircleAvatar(
-              radius: 18, backgroundColor: Colors.grey[800],
-              backgroundImage: (user?.photoURL != null) ? NetworkImage(user!.photoURL!) : null,
-              child: (user?.photoURL == null) ? Text(user != null && user.displayName != null && user.displayName!.isNotEmpty ? user.displayName![0] : "?", style: const TextStyle(color: Colors.white)) : null
-            ),
-          ),
-        );
-      }
-    );
-  }
 }
 
-class GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withValues(alpha: 0.03)..strokeWidth = 1;
-    const double step = 40.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-  }
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// SEARCH DELEGATE
+// ARAMA DELEGATE (Aynı kalıyor)
 class ComponentSearchDelegate extends SearchDelegate {
-  // Örnek Liste - Normalde Excel Service'den gelecek
-  final List<String> components = ["IRF3205", "LM358", "NE555", "BC547", "1N4007"];
+  final AppLocalizations text;
+  ComponentSearchDelegate(this.text);
+
+  final List<String> components = ["IRF3205", "LM358", "NE555", "BC547", "1N4007", "7805", "TIP31C", "2N2222"];
 
   @override
   List<Widget>? buildActions(BuildContext context) => [IconButton(icon: const Icon(Icons.clear), onPressed: () => query = '')];
@@ -250,24 +235,27 @@ class ComponentSearchDelegate extends SearchDelegate {
         final name = suggestions[index];
         return ListTile(
           title: Text(name),
-          subtitle: const Text("Testi Başlat"),
+          subtitle: Text(text.searchStartTest),
           leading: const Icon(Icons.precision_manufacturing),
           onTap: () {
-            // SEÇİLEN PARÇAYLA TESTİ BAŞLAT
-            String scriptId = "TEST_GENERIC";
-            if (name.contains("IRF")) scriptId = "TEST_MOS_N";
-            else if (name.contains("BC")) scriptId = "TEST_BJT_NPN";
-            else if (name.contains("78")) scriptId = "TEST_REGULATOR_FIXED";
+            // ARAMADAN SEÇİNCE DOĞRU VERİ GÖNDERİLİYOR
+            String pinout = "123";
+            String script = "TEST_GENERIC";
+            String pkg = "TO-220";
 
+            if (name.contains("IRF")) { pinout="GDS"; script="TEST_MOS_N"; }
+            else if (name.contains("BC")) { pinout="CBE"; script="TEST_BJT_NPN"; pkg="TO-92"; }
+            else if (name.contains("1N")) { pinout="AK"; script="TEST_DIODE"; pkg="DO-41"; }
+            
             Navigator.push(
               context, 
               MaterialPageRoute(
                 builder: (context) => ComponentTestScreen(
                   componentName: name, 
-                  packageType: "TO-220",
-                  pinout: "GDS", // Varsayılan pinout
-                  scriptId: scriptId,
-                ) 
+                  packageType: pkg, 
+                  pinout: pinout,
+                  scriptId: script
+                )
               )
             );
           },

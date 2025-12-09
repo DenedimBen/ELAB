@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // İstersen ekle
-import '../../l10n/generated/app_localizations.dart'; // Dil Destegi
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart'; // Dil Destegi
+import '../../widgets/banner_wrapper.dart';
 
 // --- ARAÇLARIN IMPORTLARI ---
 import 'resistor_screen.dart';
@@ -36,10 +37,11 @@ class ToolsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF2E3239),
-      body: Stack(
-        children: [
-          // Ortak Grid Arka Plan
-          CustomPaint(size: Size.infinite, painter: GridPainter()),
+      body: BannerWrapper(
+        child: Stack(
+          children: [
+            // Ortak Grid Arka Plan
+            CustomPaint(size: Size.infinite, painter: GridPainter()),
 
           SafeArea(
             child: Column(
@@ -197,6 +199,7 @@ class ToolsScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // Resimler için
-import 'package:timeago/timeago.dart' as timeago; // Zaman için
-import '../../services/firestore_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_application_1/services/firestore_service.dart';
+// DİL DOSYASI (KESİN YOL)
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Map<String, dynamic> postData;
@@ -16,133 +18,152 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  // Resmi Tam Ekran Açma Fonksiyonu
-  void _openFullScreenImage(String imageUrl) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.transparent, iconTheme: const IconThemeData(color: Colors.white)),
-      body: Center(
-        child: InteractiveViewer( // Zoom özelliği
-          child: CachedNetworkImage(imageUrl: imageUrl),
-        ),
-      ),
-    )));
-  }
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    // Verileri hazırla
+    final text = AppLocalizations.of(context)!;
+    
+    // TİMEAGO DİL AYARI (Burada yapıyoruz)
+    timeago.setLocaleMessages('tr', timeago.TrMessages());
+    timeago.setLocaleMessages('en', timeago.EnMessages());
+    String currentLang = Localizations.localeOf(context).languageCode;
+
+    // Verileri Hazırla
     String title = widget.postData['title'] ?? 'Başlıksız';
     String content = widget.postData['content'] ?? '';
     String author = widget.postData['authorName'] ?? 'Anonim';
-    String? authorPhoto = widget.postData['authorPhoto'];
-    String? postImage = widget.postData['imageUrl']; // <-- GÖNDERİ RESMİ
-    
-    // Tarih
+    String? photo = widget.postData['authorPhoto'];
+    String? postImage = widget.postData['imageUrl'];
     Timestamp? ts = widget.postData['timestamp'];
-    String timeAgo = ts != null ? timeago.format(ts.toDate(), locale: 'tr') : '';
+    String timeAgo = ts != null ? timeago.format(ts.toDate(), locale: currentLang) : '';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2E3239),
+      backgroundColor: const Color(0xFF1E2126),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF202329),
-        title: Text("GÖNDERİ DETAYI", style: GoogleFonts.orbitron(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 18)),
-        iconTheme: const IconThemeData(color: Colors.grey),
+        backgroundColor: Colors.transparent,
+        title: Text(text.postDetailTitle, style: const TextStyle(color: Colors.amber)), // DİL DESTEĞİ
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
-          // LİSTE (Gönderi + Yorumlar)
           Expanded(
             child: SingleChildScrollView(
-              controller: _scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // --- 1. GÖNDERİ KARTI ---
+                  // --- GÖNDERİ BAŞLIĞI VE DETAYLARI ---
                   Container(
-                    color: const Color(0xFF353A40),
-                    padding: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.all(15),
+                    color: const Color(0xFF25282F),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // GÖNDERİ RESMİ (VARSA)
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: photo != null ? NetworkImage(photo) : null,
+                              child: photo == null ? const Icon(Icons.person) : null,
+                            ),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(author, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                Text(timeAgo, style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        Text(content, style: const TextStyle(color: Colors.white70, fontSize: 15)),
+                        
                         if (postImage != null)
-                          GestureDetector(
-                            onTap: () => _openFullScreenImage(postImage),
-                            child: Hero(
-                              tag: postImage, // Animasyon etiketi
-                              child: CachedNetworkImage(
-                                imageUrl: postImage,
-                                width: double.infinity,
-                                height: 250,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(height: 250, color: Colors.black12, child: const Center(child: CircularProgressIndicator(color: Colors.amber))),
-                              ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(imageUrl: postImage),
                             ),
                           ),
-
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Yazar ve Tarih
-                              Row(
-                                children: [
-                                  CircleAvatar(radius: 16, backgroundColor: Colors.blue, backgroundImage: authorPhoto != null ? NetworkImage(authorPhoto) : null, child: authorPhoto == null ? const Icon(Icons.person, size: 16, color: Colors.white) : null),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(author, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                      Text(timeAgo, style: TextStyle(color: Colors.grey[500], fontSize: 11)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              // Başlık ve İçerik
-                              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
-                              const SizedBox(height: 10),
-                              Text(content, style: const TextStyle(color: Colors.white70, fontSize: 15, height: 1.5)),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),
 
-                  // --- 2. YORUMLAR BAŞLIĞI ---
+                  // --- YORUMLAR BAŞLIĞI ---
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                    child: Text("YORUMLAR", style: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    padding: const EdgeInsets.all(15),
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirestoreService().getComments(widget.postId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) return const SizedBox();
+                        return Text(
+                          "${snapshot.data!.docs.length} ${text.comments}", // DİL DESTEĞİ
+                          style: const TextStyle(color: Colors.grey),
+                        );
+                      },
+                    ),
                   ),
 
-                  // --- 3. YORUMLAR LİSTESİ (STREAM) ---
+                  // --- YORUM LİSTESİ ---
                   StreamBuilder<QuerySnapshot>(
                     stream: FirestoreService().getComments(widget.postId),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const Center(child: Padding(padding: EdgeInsets.all(20.0), child: CircularProgressIndicator(color: Colors.amber)));
-                      
-                      final comments = snapshot.data!.docs;
-                      if (comments.isEmpty) {
-                        return Container(
-                          padding: const EdgeInsets.all(30),
-                          alignment: Alignment.center,
-                          child: Text("Henüz yorum yok.\nİlk yorumu sen yaz!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey[600])),
-                        );
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
                       }
-
-                      // Yorumları Listele
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return const SizedBox(height: 50, child: Center(child: Text("İlk yorumu sen yaz!", style: TextStyle(color: Colors.grey))));
+                      }
+                      
                       return ListView.builder(
-                        shrinkWrap: true, // Scroll içinde scroll olmasın diye
+                        shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: comments.length,
+                        itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
-                          final cData = comments[index].data() as Map<String, dynamic>;
-                          return _buildCommentItem(cData);
+                          var comment = snapshot.data!.docs[index];
+                          var cData = comment.data() as Map<String, dynamic>;
+                          var cTime = cData['timestamp'] as Timestamp?;
+                          var cTimeAgo = cTime != null ? timeago.format(cTime.toDate(), locale: currentLang) : '';
+
+                          return Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2C2F36),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CircleAvatar(
+                                  radius: 15,
+                                  backgroundImage: cData['authorPhoto'] != null ? NetworkImage(cData['authorPhoto']) : null,
+                                  child: cData['authorPhoto'] == null ? const Icon(Icons.person, size: 15) : null,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(cData['authorName'] ?? 'Anonim', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                                          Text(cTimeAgo, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text(cData['content'] ?? '', style: const TextStyle(color: Colors.white70)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                       );
                     },
@@ -152,53 +173,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
             ),
           ),
-
-          // --- 4. YORUM YAZMA ALANI (SABİT ALT) ---
+          
+          // --- YORUM YAZMA ALANI ---
           CommentInputArea(postId: widget.postId),
-        ],
-      ),
-    );
-  }
-
-  // YORUM KARTI TASARIMI
-  Widget _buildCommentItem(Map<String, dynamic> data) {
-    String author = data['authorName'] ?? 'Anonim';
-    String? photo = data['authorPhoto'];
-    String content = data['content'] ?? '';
-    Timestamp? ts = data['timestamp'];
-    String timeAgo = ts != null ? timeago.format(ts.toDate(), locale: 'tr') : '';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)))),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(radius: 18, backgroundImage: photo != null ? NetworkImage(photo) : null, child: photo == null ? const Icon(Icons.person, size: 18, color: Colors.white) : null),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(author, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(width: 10),
-                    Text(timeAgo, style: TextStyle(color: Colors.grey[600], fontSize: 11)),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(content, style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.3)),
-              ],
-            ),
-          )
         ],
       ),
     );
   }
 }
 
-// Bu widget'ı PostDetailScreen içinde yorum yazdığı input alanı yerine kullan
+// --- YORUM INPUT WIDGET ---
 class CommentInputArea extends StatefulWidget {
   final String postId;
   const CommentInputArea({super.key, required this.postId});
@@ -209,43 +193,28 @@ class CommentInputArea extends StatefulWidget {
 
 class _CommentInputAreaState extends State<CommentInputArea> {
   final _controller = TextEditingController();
-  bool _isSending = false; // KİLİT MEKANİZMASI 🔒
+  bool _isSending = false;
 
   void _sendComment() async {
     final content = _controller.text.trim();
     if (content.isEmpty) return;
-
-    // 1. KİLİDİ AKTİF ET (Butona tekrar basılamaz)
     setState(() => _isSending = true);
-
+    
     try {
-      // 2. Yorumu Gönder
       await FirestoreService().addComment(widget.postId, content);
-      
-      // XP KAZANDIR: Yorum Yapmak +20 XP
-      await FirestoreService().addXP(20);
-
-      // 3. Başarılıysa Temizle
       _controller.clear();
-      // Klavye açık kalsın mı kapansın mı? Genelde açık kalması iyidir.
-      // FocusScope.of(context).unfocus(); 
-      
+      FocusManager.instance.primaryFocus?.unfocus(); // Klavyeyi kapat
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Hata: $e"), backgroundColor: Colors.red),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Hata: $e")));
     } finally {
-      // 4. KİLİDİ AÇ (Hata olsa bile kilit açılmalı ki tekrar deneyebilsin)
-      if (mounted) {
-        setState(() => _isSending = false);
-      }
+      if (mounted) setState(() => _isSending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       color: const Color(0xFF25282F),
       child: Row(
         children: [
@@ -256,20 +225,19 @@ class _CommentInputAreaState extends State<CommentInputArea> {
               decoration: InputDecoration(
                 hintText: "Yorum yaz...",
                 hintStyle: TextStyle(color: Colors.grey[600]),
-                border: InputBorder.none,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                filled: true,
+                fillColor: Colors.black12,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
             ),
           ),
+          const SizedBox(width: 10),
           IconButton(
-            // Eğer gönderiliyorsa butonu devre dışı bırak (null yap)
             onPressed: _isSending ? null : _sendComment,
             icon: _isSending 
-                ? const SizedBox( // Yükleniyor ikonu
-                    width: 20, 
-                    height: 20, 
-                    child: CircularProgressIndicator(color: Colors.amber, strokeWidth: 2)
-                  )
-                : const Icon(Icons.send, color: Colors.amber),
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.amber))
+              : const Icon(Icons.send, color: Colors.amber),
           )
         ],
       ),

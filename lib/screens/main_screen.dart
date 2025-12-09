@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../l10n/generated/app_localizations.dart';
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
+import '../widgets/banner_wrapper.dart'; // Reklam Wrapper'ı
 
+// EKRANLAR
 import 'home/home_screen.dart';
-import 'home/favorites_screen.dart';
 import 'community/community_screen.dart';
+import 'home/favorites_screen.dart';
+import 'auth/profile_screen.dart';
+import 'settings/settings_screen.dart'; // EKLENDİ ✅
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,11 +21,13 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // ARTIK SADECE 3 ANA EKRAN VAR
+  // --- SAYFA LİSTESİ (Sıralama Önemli!) ---
   final List<Widget> _pages = [
-    const HomeScreen(),      // 0: Dashboard
-    const CommunityScreen(), // 1: Topluluk
-    const FavoritesScreen(), // 2: Favoriler
+    const HomeScreen(),       // 0
+    const CommunityScreen(),  // 1
+    const FavoritesScreen(),  // 2
+    const ProfileScreen(),    // 3
+    const SettingsScreen(),   // 4 (EKLENDİ ✅)
   ];
 
   @override
@@ -29,21 +35,22 @@ class _MainScreenState extends State<MainScreen> {
     final text = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2E3239),
+      backgroundColor: const Color(0xFF1E2126),
       
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+      // BODY (Reklamlı Wrapper İçinde)
+      body: BannerWrapper(
+        child: _pages[_selectedIndex],
       ),
 
+      // ALT MENÜ
       bottomNavigationBar: Container(
-        color: const Color(0xFF202329),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        color: const Color(0xFF181A1F),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         child: GNav(
-          backgroundColor: const Color(0xFF202329),
+          backgroundColor: const Color(0xFF181A1F),
           color: Colors.grey,
           activeColor: Colors.amber,
-          tabBackgroundColor: Colors.amber.withValues(alpha: 0.1),
+          tabBackgroundColor: Colors.amber.withOpacity(0.1),
           gap: 8,
           padding: const EdgeInsets.all(12),
           selectedIndex: _selectedIndex,
@@ -52,11 +59,17 @@ class _MainScreenState extends State<MainScreen> {
               _selectedIndex = index;
             });
           },
-          // SADECE 3 SEKME
           tabs: [
-            GButton(icon: Icons.home_filled, text: text.navHome),
-            GButton(icon: FontAwesomeIcons.users, text: text.navCommunity),
-            GButton(icon: Icons.favorite, text: text.navFavorites),
+            GButton(icon: Icons.home_filled, text: text.navHome),       // 0
+            GButton(icon: FontAwesomeIcons.users, text: text.navCommunity), // 1
+            GButton(icon: Icons.favorite, text: text.navFavorites),     // 2
+            GButton(icon: Icons.person, text: text.navProfile),         // 3
+            
+            // --- 5. SEKME: AYARLAR (EKLENDİ ✅) ---
+            GButton(
+              icon: Icons.settings, 
+              text: text.navSettings ?? "Ayarlar" // Hata olursa diye yedek metin
+            ),
           ],
         ),
       ),

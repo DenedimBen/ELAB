@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../l10n/generated/app_localizations.dart'; // DIL PAKETI
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart'; // DIL PAKETI
 import '../../services/firestore_service.dart';
 import '../../services/storage_service.dart';
 

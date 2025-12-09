@@ -2,32 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocaleProvider extends ChangeNotifier {
-  Locale _locale = const Locale('tr'); // Varsayılan Türkçe
+  Locale _locale;
+
+  // Başlangıçta varsayılan dil (Telefonun dili neyse o olsun istersek null bırakabiliriz ama şimdilik Türkçe başlasın)
+  LocaleProvider() : _locale = const Locale('tr') {
+    _loadFromPrefs(); // Hafızadan oku
+  }
 
   Locale get locale => _locale;
 
-  LocaleProvider() {
-    _loadLocale();
-  }
+  // Dili Değiştirme Fonksiyonu
+  void setLocale(Locale locale) {
+    if (!['tr', 'en'].contains(locale.languageCode)) return;
 
-  // Dili değiştir ve kaydet
-  void setLocale(Locale locale) async {
     _locale = locale;
-    notifyListeners(); // Tüm uygulamaya haber ver
-    
-    // Hafızaya kaydet
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('language_code', locale.languageCode);
+    _saveToPrefs(locale); // Kaydet
+    notifyListeners(); // TÜM UYGULAMAYI GÜNCELLE 🔔
   }
 
-  // Açılışta hafızadan oku
-  void _loadLocale() async {
+  // Hafızadan Okuma
+  Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? languageCode = prefs.getString('language_code');
+    final String? langCode = prefs.getString('language_code');
     
-    if (languageCode != null) {
-      _locale = Locale(languageCode);
+    if (langCode != null) {
+      _locale = Locale(langCode);
       notifyListeners();
     }
+  }
+
+  // Hafızaya Yazma
+  Future<void> _saveToPrefs(Locale locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language_code', locale.languageCode);
   }
 }

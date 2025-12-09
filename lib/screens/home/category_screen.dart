@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/component_model.dart';
-import '../../test_engine/test_screen.dart'; // Yeni dosyanın yolu
+// import '../../test_engine/test_screen.dart'; // Yeni dosyanın yolu
 import '../component_detail_screen.dart'; // Detay ekranı importu
 import '../../utils/sound_manager.dart';
 
 class CategoryScreen extends StatelessWidget {
   final String categoryTitle;
-  final List<Component> components;
+  final List<ComponentModel> components;
 
   const CategoryScreen({super.key, required this.categoryTitle, required this.components});
 

@@ -1,4 +1,4 @@
-class Component {
+class ComponentModel {
   final String id;
   final String category;
   final String polarity;
@@ -13,7 +13,7 @@ class Component {
   final List<String> pinNames;
   final String applications; // YENİ ALAN
 
-  Component({
+  ComponentModel({
     required this.id,
     required this.category,
     required this.polarity,
@@ -30,7 +30,7 @@ class Component {
   });
 
   // Excel Satırından Model Üretme
-  factory Component.fromExcelRow(List<dynamic> row) {
+  factory ComponentModel.fromExcelRow(List<dynamic> row) {
     // Güvenli veri okuma (Boş gelirse hata vermesin)
     String getSafe(int index) {
       if (index < row.length && row[index] != null) return row[index].toString();
@@ -48,7 +48,7 @@ class Component {
     // 0:id, 1:category, 2:polarity, 3:package_id, 4:pinout_code, 
     // 5:v_max, 6:i_max, 7:power_max, 8:test_script_id, 9:description, 10:url, 11:pin_names, 12:applications
     
-    return Component(
+    return ComponentModel(
       id: getSafe(0),
       category: getSafe(1),
       polarity: getSafe(2),

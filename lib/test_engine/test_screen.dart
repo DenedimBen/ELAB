@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'test_scripts.dart';
 import 'component_visualizer.dart';
@@ -31,9 +32,14 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     // Excel'den gelen "test_script_id" (Örn: TEST_MOS_N) ve "pinout" (GDS) 
     // bilgisini vererek doğru testi alıyoruz.
-    _steps = TestScripts.getScript(widget.scriptId, widget.pinout); 
+    _steps = TestScripts.getScript(context, widget.scriptId, widget.pinout);
   }
 
   void _nextStep() {
@@ -53,7 +59,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
       _currentStep = 0;
       _isFlipped = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Test Yeniden Başlatıldı 🔄"), duration: Duration(seconds: 1)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.msgTestRestarted), duration: const Duration(seconds: 1)));
   }
 
   void _showResultDialog() {
@@ -62,8 +68,8 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
       barrierDismissible: false, // Reklamı atlamasın diye
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF25282F),
-        title: const Text("TEST TAMAMLANDI", style: TextStyle(color: Colors.greenAccent)),
-        content: const Text("Tüm adımlar başarılıysa komponent SAĞLAMDIR. \n\nEğer herhangi bir adımda 'HAYIR' dediyseniz komponent ARIZALIDIR.", style: TextStyle(color: Colors.white)),
+        title: Text(AppLocalizations.of(context)!.msgTestCompleteTitle, style: const TextStyle(color: Colors.greenAccent)),
+        content: Text(AppLocalizations.of(context)!.msgTestCompleteBody, style: const TextStyle(color: Colors.white)),
         actions: [
           TextButton(
             onPressed: () {
@@ -74,7 +80,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
               // Test bittiği için sayaca bakma, direkt göster
               AdService().showInterstitialAd(force: true); 
             },
-            child: const Text("Tamam"),
+            child: Text(AppLocalizations.of(context)!.btnOk),
           )
         ],
       ),
@@ -94,7 +100,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
         actions: [
           IconButton(
             icon: Icon(_isFlipped ? Icons.flip_to_front : Icons.flip_to_back, color: Colors.white),
-            tooltip: "Parçayı Çevir",
+            tooltip: AppLocalizations.of(context)!.tooltipFlip,
             onPressed: () => setState(() => _isFlipped = !_isFlipped),
           )
         ],
@@ -113,7 +119,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    "Lütfen ölçü aleti proplarını aşağıda yanıp sönen bacaklara temas ettirin.",
+                    AppLocalizations.of(context)!.msgInfoBubble,
                     style: GoogleFonts.roboto(
                       color: Colors.blueAccent[100], 
                       fontSize: 13,
@@ -300,7 +306,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[800]),
                           onPressed: _prevStep,
-                          child: const Text("Geri", style: TextStyle(color: Colors.white)),
+                          child: Text(AppLocalizations.of(context)!.btnBack, style: const TextStyle(color: Colors.white)),
                         ),
                       
                       ElevatedButton.icon(
@@ -310,7 +316,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
                         ),
                         onPressed: _nextStep,
                         icon: Icon(step.isAction ? Icons.touch_app : Icons.check),
-                        label: Text(step.isAction ? "UYGULADIM" : "EVET (Doğru)", style: const TextStyle(fontSize: 16)),
+                        label: Text(step.isAction ? AppLocalizations.of(context)!.btnApplied : AppLocalizations.of(context)!.btnYesCorrect, style: const TextStyle(fontSize: 16)),
                       ),
                     ],
                   )

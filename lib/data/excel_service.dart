@@ -4,7 +4,7 @@ import '../models/component_model.dart';
 
 class ExcelService {
   // Tüm parçaların listesi
-  List<Component> allComponents = [];
+  List<ComponentModel> allComponents = [];
   
   // SMD Kod Sözlüğü: "1A" -> ["BC846", "MMBT3904"] (Bir kod birden fazla parça olabilir)
   Map<String, List<String>> smdDictionary = {};
@@ -23,7 +23,7 @@ class ExcelService {
         var row = compTable.rows[i];
         if (row.isEmpty || row[0] == null) continue;
         try {
-          allComponents.add(Component.fromExcelRow(row));
+          allComponents.add(ComponentModel.fromExcelRow(row));
         } catch (e) {
           print("⚠️ Komponent okuma hatası: $e");
         }
@@ -58,7 +58,7 @@ class ExcelService {
   }
 
   // ID'ye göre parça bulma (SMD sonuçları için lazım)
-  Component? getComponentById(String id) {
+  ComponentModel? getComponentById(String id) {
     try {
       return allComponents.firstWhere((c) => c.id.toLowerCase() == id.toLowerCase());
     } catch (e) {

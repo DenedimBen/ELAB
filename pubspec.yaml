@@ -70,7 +70,6 @@ dependencies:
   timeago: ^3.6.1               # "3 dakika önce" formatı
   
   # Localization ve I18n
-  flutter_gen: ^5.3.2           # Localization kodları oluşturmak için
   url_launcher: ^6.3.2
   share_plus: ^10.0.0
 
@@ -78,7 +77,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-  flutter_gen_runner: ^5.3.2  # Dil dosyalarını otomatik generate etmek için
   
   # İKON VE SPLASH İÇİN GEREKLİ PAKETLER:
   flutter_launcher_icons: ^0.13.1
@@ -115,17 +113,23 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
-# --- UYGULAMA İKONU AYARLARI ---
+# --- 1. UYGULAMA İKONU AYARLARI ---
 flutter_launcher_icons:
-  android: true
+  android: "launcher_icon"
   ios: true
-  image_path: "assets/images/app_icon.png"
-  min_sdk_android: 21 # Android sürümü
+  image_path: "assets/images/app_icon.png" 
+  min_sdk_android: 21 
+  # Android 8+ için Adaptive Icon (İsteğe bağlı ama önerilir)
+  adaptive_icon_background: "#1E2126" # Bizim koyu tema rengimiz
+  adaptive_icon_foreground: "assets/images/splash_logo.png" # Şeffaf logo buraya da uyar
 
-# --- AÇILIŞ EKRANI AYARLARI ---
+# --- 2. AÇILIŞ EKRANI (SPLASH) AYARLARI ---
 flutter_native_splash:
-  color: "#2E3239" # Bizim koyu tema rengimiz
-  image: "assets/images/app_icon.png"
+  color: "#1E2126" # Arka plan rengi (Uygulamanın temasıyla aynı)
+  image: "assets/images/splash_logo.png" # Ortadaki logo
+  fullscreen: true # Tam ekran olsun (Status bar gizlensin mi? True ise gizlenir)
+  
+  # Android 12+ (Özel ayar gerektirir)
   android_12:
-    image: "assets/images/app_icon.png"
-    color: "#2E3239"
+    image: "assets/images/splash_logo.png"
+    color: "#1E2126"

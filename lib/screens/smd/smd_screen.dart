@@ -15,7 +15,7 @@ class _SmdScreenState extends State<SmdScreen> {
   final ExcelService _service = ExcelService();
   final TextEditingController _codeController = TextEditingController();
   
-  List<Component> _foundComponents = [];
+  List<ComponentModel> _foundComponents = [];
   bool _hasSearched = false; // Arama yapıldı mı?
 
   @override
@@ -38,7 +38,7 @@ class _SmdScreenState extends State<SmdScreen> {
     }
 
     String code = input.trim().toUpperCase();
-    List<Component> results = [];
+    List<ComponentModel> results = [];
 
     // Sözlükten bak: Bu kod var mı?
     if (_service.smdDictionary.containsKey(code)) {
@@ -46,7 +46,7 @@ class _SmdScreenState extends State<SmdScreen> {
       
       // Bulunan ID'lerin detaylarını çek
       for (String id in ids) {
-        Component? comp = _service.getComponentById(id);
+        ComponentModel? comp = _service.getComponentById(id);
         if (comp != null) {
           results.add(comp);
         }
@@ -231,7 +231,7 @@ class _SmdScreenState extends State<SmdScreen> {
   }
 
   // Sonuç Kartı
-  Widget _buildResultCard(BuildContext context, Component comp) {
+  Widget _buildResultCard(BuildContext context, ComponentModel comp) {
     return GestureDetector(
       onTap: () {
         Navigator.push(

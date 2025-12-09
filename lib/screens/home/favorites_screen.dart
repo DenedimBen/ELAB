@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/generated/app_localizations.dart';
-import '../../data/excel_service.dart';
-import '../../models/component_model.dart';
-import '../../services/firestore_service.dart';
-import '../../utils/sound_manager.dart';
-import '../../test_engine/test_screen.dart';
-import 'home_screen.dart'; // GridPainter için
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
+import 'package:flutter_application_1/data/excel_service.dart';
+import 'package:flutter_application_1/models/component_model.dart';
+import 'package:flutter_application_1/services/firestore_service.dart';
+import 'package:flutter_application_1/utils/sound_manager.dart';
+import 'package:flutter_application_1/test_engine/test_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -19,7 +19,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   final ExcelService _excelService = ExcelService();
   final FirestoreService _firestoreService = FirestoreService();
   
-  List<Component> allComponents = [];
+  List<ComponentModel> allComponents = [];
 
   @override
   void initState() {
@@ -111,7 +111,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildFavCard(Component comp) {
+  Widget _buildFavCard(ComponentModel comp) {
     return GestureDetector(
       onTap: () {
         SoundManager.playClick();
@@ -163,4 +163,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       ),
     );
   }
+}
+
+// Grid Painter (Arka Plan Izgarası)
+class GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withOpacity(0.03)..strokeWidth = 1;
+    const double step = 40.0;
+    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
