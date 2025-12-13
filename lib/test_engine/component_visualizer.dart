@@ -97,8 +97,8 @@ class _ComponentVisualizerState extends State<ComponentVisualizer> with SingleTi
               bool isBlack = (widget.blackPinIndex == index);
               bool isActive = isRed || isBlack;
 
-              Color bgColor = Colors.amber.withOpacity(0.2); 
-              Color borderColor = Colors.amber.withOpacity(0.5);
+              Color bgColor = Colors.amber.withValues(alpha: 0.2); 
+              Color borderColor = Colors.amber.withValues(alpha: 0.5);
               Color textColor = Colors.amber;
               
               // Gölge ve Renk Ayarları
@@ -108,12 +108,12 @@ class _ComponentVisualizerState extends State<ComponentVisualizer> with SingleTi
                 bgColor = Colors.redAccent;
                 borderColor = Colors.red;
                 textColor = Colors.white;
-                shadows = [BoxShadow(color: Colors.redAccent.withOpacity(0.8), blurRadius: 15, spreadRadius: 2)];
+                shadows = [BoxShadow(color: Colors.redAccent.withValues(alpha: 0.8), blurRadius: 15, spreadRadius: 2)];
               } else if (isBlack) {
                 bgColor = const Color(0xFF222222);
                 borderColor = Colors.white; 
                 textColor = Colors.white;
-                shadows = [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 10, spreadRadius: 1)];
+                shadows = [BoxShadow(color: Colors.white.withValues(alpha: 0.3), blurRadius: 10, spreadRadius: 1)];
               }
 
               // --- KONUM AYARLARI (SENİN AYARLARIN) ---
@@ -124,8 +124,9 @@ class _ComponentVisualizerState extends State<ComponentVisualizer> with SingleTi
 
               // 1. STANDART DİYOTLAR (DO-41)
               if (widget.packageType == 'DO-41') {
-                 if (index == 0) labelY = 0.65; 
-                 else if (index == 1) { 
+                 if (index == 0) {
+                   labelY = 0.65;
+                 } else if (index == 1) { 
                     labelX += 0.05; 
                     labelY = 0.65; 
                  }
@@ -133,8 +134,9 @@ class _ComponentVisualizerState extends State<ComponentVisualizer> with SingleTi
 
               // 2. ZENER DİYOTLAR (DO-35)
               if (widget.packageType == 'DO-35') {
-                 if (index == 0) labelY = 0.75; // Senin ayarın
-                 else if (index == 1) { 
+                 if (index == 0) {
+                   labelY = 0.75; // Senin ayarın
+                 } else if (index == 1) { 
                     labelX += 0.00; 
                     labelY = 0.40; // Senin ayarın
                  }

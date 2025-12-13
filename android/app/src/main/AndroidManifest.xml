@@ -12,7 +12,7 @@
         </intent>
     </queries>
     <application
-        android:label="flutter_application_1"
+        android:label="E-LAB"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

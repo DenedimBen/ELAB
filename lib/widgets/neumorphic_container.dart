@@ -21,16 +21,16 @@ class NeumorphicContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
+        boxShadow: const [
           // Sağ alt köşe (Karanlık Gölge)
           BoxShadow(
-            color: const Color(0xFFB8C0CC),
-            offset: const Offset(6, 6),
+            color: Color(0xFFB8C0CC),
+            offset: Offset(6, 6),
             blurRadius: 12,
             spreadRadius: 1,
           ),
           // Sol üst köşe (Aydınlık Gölge - Işık Vuruyor)
-          const BoxShadow(
+          BoxShadow(
             color: Colors.white,
             offset: Offset(-6, -6),
             blurRadius: 12,

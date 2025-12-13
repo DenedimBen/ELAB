@@ -85,7 +85,7 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E2126),
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20)],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 20)],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,8 +205,8 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF1E2126),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
         ),
         child: Row(
           children: [
@@ -215,7 +215,7 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
               width: 60, height: 60,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Image.asset(
@@ -238,7 +238,7 @@ class _ComponentMenuScreenState extends State<ComponentMenuScreen> {
                       Text(comp.id, style: GoogleFonts.orbitron(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                        decoration: BoxDecoration(color: Colors.blueAccent.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
                         child: Text(comp.packageId, style: const TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ],

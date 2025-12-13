@@ -1,160 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
+import 'package:flutter_application_1/screens/knowledge/knowledge_detail_screen.dart';
 
 class KnowledgeScreen extends StatelessWidget {
   const KnowledgeScreen({super.key});
-
 
   @override
   Widget build(BuildContext context) {
     final text = AppLocalizations.of(context)!;
 
-    // ZENGİNLEŞTİRİLMİŞ BİLGİ BANKASI
-    final List<Map<String, dynamic>> topics = [
+    // --- KATEGORİ VERİLERİ (SADECE TEORİK BİLGİLER) ---
+    final List<Map<String, dynamic>> categories = [
       {
-        "title": text.basicLaws,
-        "icon": Icons.balance,
-        "color": Colors.amber,
+        "title": text.kbPinouts, // Konnektör Pinoutları (USB, HDMI vb.)
+        "color": const Color(0xFF2962FF), // Mavi
+        "icon": Icons.cable, 
         "items": [
-          {"t": "Ohm Kanunu", "f": "V = I × R", "d": "Voltaj = Akım x Direnç. Elektroniğin en temel yasasıdır."},
-          {"t": "Güç (DC)", "f": "P = V × I", "d": "Güç, voltaj ve akımın çarpımıdır."},
-          {"t": "Kirchhoff Akım (KCL)", "f": "ΣIgiren = ΣIçıkan", "d": "Bir düğüme giren akımların toplamı, çıkanlara eşittir."},
+          {"name": "USB Types (A, B, C)", "icon": Icons.usb, "path": "assets/pinouts/usb_types.png", "desc": "Pin configurations"},
+          {"name": "RJ45 Ethernet", "icon": Icons.lan, "path": "assets/pinouts/rj45.png", "desc": "T568A vs T568B"},
+          {"name": "HDMI Pinout", "icon": Icons.tv, "path": "assets/pinouts/hdmi.png", "desc": "Standard HDMI Connector"},
         ]
       },
       {
-        "title": text.acCircuits,
-        "icon": Icons.waves,
-        "color": Colors.cyanAccent,
+        "title": text.kbProtocols,
+        "color": const Color(0xFF00C853), // Yeşil
+        "icon": Icons.compare_arrows,
         "items": [
-          {"t": "Frekans", "f": "f = 1 / T", "d": "Saniyedeki döngü sayısı. T = Periyot."},
-          {"t": "Empedans (Z)", "f": "Z = √(R² + X²)", "d": "AC devrelerdeki toplam direnç (Reel + Sanal)."},
-          {"t": "Rezonans", "f": "f = 1 / (2π√LC)", "d": "Endüktif ve Kapasitif reaktansın eşitlendiği an."},
+          {"name": "I2C (Inter-Integrated Circuit)", "icon": Icons.share, "path": "assets/protocols/i2c.png", "desc": "SDA, SCL - Address based"},
+          {"name": "SPI (Serial Peripheral Interface)", "icon": Icons.cable, "path": "assets/protocols/spi.png", "desc": "MISO, MOSI, SCK, CS"},
+          {"name": "UART (Serial)", "icon": Icons.settings_ethernet, "path": "assets/protocols/uart.png", "desc": "TX, RX - Asynchronous"},
+          {"name": "CAN Bus", "icon": Icons.directions_car, "path": "assets/protocols/canbus.png", "desc": "Automotive protocol"},
         ]
       },
       {
-        "title": text.catDiodes,
-        "icon": Icons.flash_on,
-        "color": Colors.orangeAccent,
+        "title": text.kbCheatsheets,
+        "color": const Color(0xFFFFAB00), // Amber
+        "icon": Icons.table_chart,
         "items": [
-          {"t": "İletim Voltajı (Vf)", "f": "Si: 0.7V, Ge: 0.3V", "d": "Diyotun iletime geçmesi için gereken minimum voltaj."},
-          {"t": "Zener Diyot", "f": "Vz = Sabit", "d": "Ters polaramada belirli bir voltajı sabit tutar."},
+          {"name": "AWG Kablo Cetveli", "icon": Icons.linear_scale, "path": "assets/tables/awg.png", "desc": "Amper taşıma kapasiteleri"},
+          {"name": "IP Koruma Sınıfları", "icon": Icons.water_drop, "path": "assets/tables/ip_ratings.png", "desc": "IP67, IP68 anlamları"},
+          {"name": "PCB Yol Genişliği", "icon": Icons.map, "path": "assets/tables/pcb_trace.png", "desc": "1oz Bakır için akım değerleri"},
+          {"name": "Pil Voltajları", "icon": Icons.battery_charging_full, "path": "assets/tables/batteries.png", "desc": "Li-Ion, LiFePO4, NiMH"},
         ]
       },
       {
-        "title": text.digitalLogic,
-        "icon": Icons.memory,
-        "color": Colors.greenAccent,
+        "title": text.kbSymbols,
+        "color": const Color(0xFFD50000), // Kırmızı
+        "icon": Icons.extension,
         "items": [
-          {"t": "AND Kapısı", "f": "Y = A . B", "d": "Sadece her iki giriş de 1 ise çıkış 1 olur."},
-          {"t": "OR Kapısı", "f": "Y = A + B", "d": "Girişlerden en az biri 1 ise çıkış 1 olur."},
-          {"t": "Logic Levels", "f": "TTL: 5V, CMOS: 3.3V", "d": "Dijital devrelerin lojik 1 ve 0 voltaj seviyeleri."},
-        ]
-      },
-      {
-        "title": "SMD KODLARI",
-        "icon": Icons.qr_code,
-        "color": Colors.purpleAccent,
-        "items": [
-          {"t": "Direnç (3 Digit)", "f": "103 = 10kΩ", "d": "İlk iki rakam değer, son rakam sıfır sayısı."},
-          {"t": "Kondansatör", "f": "104 = 100nF", "d": "PikoFarad (pF) cinsinden hesaplanır."},
+          {"name": "Temel Bileşenler", "icon": Icons.check_box_outline_blank, "path": "assets/symbols/basic.png", "desc": "Direnç, Kapasitör, Bobin"},
+          {"name": "Yarı İletkenler", "icon": Icons.device_hub, "path": "assets/symbols/semiconductors.png", "desc": "Diyot, Transistör, MOSFET"},
+          {"name": "Anahtarlar & Röleler", "icon": Icons.toggle_on, "path": "assets/symbols/switches.png", "desc": "SPST, DPDT, Röle"},
         ]
       },
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF202329),
-      body: CustomScrollView(
-        slivers: [
-          // 1. HAVALI KAYAN BAŞLIK (SLIVER APP BAR)
-          SliverAppBar(
-            expandedHeight: 200.0,
-            floating: false,
-            pinned: true,
-            backgroundColor: const Color(0xFF202329),
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(text.knowledgeBase, 
-                  style: GoogleFonts.orbitron(
-                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16,
-                      shadows: const [BoxShadow(color: Colors.blueAccent, blurRadius: 10)]
-                  )),
-              background: Container(
+      backgroundColor: const Color(0xFF1E2126),
+      appBar: AppBar(
+        title: Text(text.knowledgeBase, style: GoogleFonts.orbitron(color: Colors.amber, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 15,
+            mainAxisSpacing: 15,
+            childAspectRatio: 1.1,
+          ),
+          itemCount: categories.length,
+          itemBuilder: (context, index) {
+            final cat = categories[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryDetailScreen(
+                      title: cat['title'],
+                      items: cat['items'],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [Colors.blue.withValues(alpha: 0.2), const Color(0xFF202329)]
-                  )
+                    colors: [
+                      (cat['color'] as Color).withOpacity(0.2),
+                      (cat['color'] as Color).withOpacity(0.05),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: (cat['color'] as Color).withOpacity(0.5), width: 1),
+                  boxShadow: [BoxShadow(color: (cat['color'] as Color).withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))]
                 ),
-                child: Center(child: Icon(Icons.menu_book, size: 80, color: Colors.white.withValues(alpha: 0.1))),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: (cat['color'] as Color).withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(cat['icon'], size: 40, color: cat['color']),
+                    ),
+                    const SizedBox(height: 15),
+                    Text(
+                      cat['title'],
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.teko(
+                        color: Colors.white, 
+                        fontSize: 20, 
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1
+                      ),
+                    ),
+                    Text(
+                      "${(cat['items'] as List).length} İçerik",
+                      style: TextStyle(color: Colors.grey[400], fontSize: 10),
+                    )
+                  ],
+                ),
               ),
-            ),
-          ),
-
-          // 2. İÇERİK LİSTESİ
-          SliverPadding(
-            padding: const EdgeInsets.all(15),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final category = topics[index];
-                  return _buildCategoryGroup(category);
-                },
-                childCount: topics.length,
-              ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
-    );
-  }
-
-  Widget _buildCategoryGroup(Map<String, dynamic> category) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 25),
-      decoration: BoxDecoration(
-        color: const Color(0xFF30353C),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: (category['color'] as Color).withValues(alpha: 0.3)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5))]
-      ),
-      child: Column(
-        children: [
-          // Kategori Başlığı
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: (category['color'] as Color).withValues(alpha: 0.1),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20))
-            ),
-            child: Row(
-              children: [
-                Icon(category['icon'], color: category['color']),
-                const SizedBox(width: 15),
-                Text(category['title'], style: GoogleFonts.orbitron(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          
-          // Maddeler
-          ...((category['items'] as List).map((item) => _buildInfoTile(item, category['color']))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoTile(Map<String, String> item, Color color) {
-    return ExpansionTile(
-      collapsedIconColor: Colors.grey,
-      iconColor: color,
-      title: Text(item['t']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      subtitle: Text(item['f']!, style: TextStyle(color: color, fontFamily: 'Courier', fontWeight: FontWeight.bold)),
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-          child: Text(item['d']!, style: const TextStyle(color: Colors.grey, height: 1.4)),
-        )
-      ],
     );
   }
 }

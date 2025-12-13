@@ -42,6 +42,17 @@ class AuthService {
     }
   }
 
+  // MİSAFİR GİRİŞİ (YENİ)
+  Future<User?> signInAnonymously() async {
+    try {
+      final UserCredential credential = await _auth.signInAnonymously();
+      return credential.user;
+    } catch (e) {
+      print("Misafir girişi hatası: $e");
+      return null;
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await _googleSignIn.disconnect();

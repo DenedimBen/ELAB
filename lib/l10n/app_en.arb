@@ -143,5 +143,11 @@
   "rank12": "AI Core",
   "rank13": "Singularity",
   "rank14": "E-LAB LEGEND",
-  "rank15": "SYSTEM ADMIN"
+  "rank15": "SYSTEM ADMIN",
+  "kbPinouts": "PINOUT DIAGRAMS",
+  "kbProtocols": "COMMUNICATION",
+  "kbCheatsheets": "CHEATSHEETS",
+  "kbSymbols": "SYMBOLS",
+  "kbComponents": "COMPONENTS",
+  "kbTheory": "BASIC THEORY"
 }

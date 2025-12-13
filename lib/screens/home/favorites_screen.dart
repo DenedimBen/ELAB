@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
 import 'package:flutter_application_1/data/excel_service.dart';
 import 'package:flutter_application_1/models/component_model.dart';
@@ -169,10 +168,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white.withOpacity(0.03)..strokeWidth = 1;
+    final paint = Paint()..color = Colors.white.withValues(alpha: 0.03)..strokeWidth = 1;
     const double step = 40.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;

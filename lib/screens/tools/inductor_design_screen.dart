@@ -42,11 +42,11 @@ class _InductorDesignScreenState extends State<InductorDesignScreen> with Single
     // d: Bobin çapı (inç)
     // l: Bobin uzunluğu (inç) -> (Sarım Sayısı * Tel Kalınlığı)
     
-    double d_inch = diameter / 25.4;
-    double l_inch = (turns * wireGauge) / 25.4;
+    double dInch = diameter / 25.4;
+    double lInch = (turns * wireGauge) / 25.4;
     
-    double numerator = pow(d_inch, 2).toDouble() * pow(turns, 2).toDouble();
-    double denominator = (18 * d_inch) + (40 * l_inch);
+    double numerator = pow(dInch, 2).toDouble() * pow(turns, 2).toDouble();
+    double denominator = (18 * dInch) + (40 * lInch);
     
     double inductance = numerator / denominator; // MikroHenry (uH)
 
@@ -282,8 +282,12 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white.withValues(alpha: 0.03)..strokeWidth = 1;
     const double step = 40.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;

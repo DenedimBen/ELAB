@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: const Color(0xFF181A1F),
           color: Colors.grey,
           activeColor: Colors.amber,
-          tabBackgroundColor: Colors.amber.withOpacity(0.1),
+          tabBackgroundColor: Colors.amber.withValues(alpha: 0.1),
           gap: 8,
           padding: const EdgeInsets.all(12),
           selectedIndex: _selectedIndex,
@@ -68,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
             // --- 5. SEKME: AYARLAR (EKLENDİ ✅) ---
             GButton(
               icon: Icons.settings, 
-              text: text.navSettings ?? "Ayarlar" // Hata olursa diye yedek metin
+              text: text.navSettings
             ),
           ],
         ),

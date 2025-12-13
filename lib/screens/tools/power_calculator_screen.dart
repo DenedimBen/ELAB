@@ -197,7 +197,7 @@ class _PowerCalculatorScreenState extends State<PowerCalculatorScreen> with Sing
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("DC GÜÇ (P)", style: TextStyle(color: Colors.amber, letterSpacing: 2)),
+                            const Text("DC GÜÇ (P)", style: TextStyle(color: Colors.amber, letterSpacing: 2)),
                             const SizedBox(height: 10),
                             Text(resActive, style: GoogleFonts.shareTechMono(fontSize: 50, color: Colors.white, fontWeight: FontWeight.bold)),
                           ],
@@ -347,7 +347,7 @@ class PowerTrianglePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color..strokeWidth = 3..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
     final fillPaint = Paint()..color = color.withValues(alpha: 0.1)..style = PaintingStyle.fill;
-    final textStyle = const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold);
+    const textStyle = TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold);
 
     double angle = acos(pf); 
     double baseLen = size.width * 0.7; 

@@ -278,8 +278,11 @@ class SineWavePainter extends CustomPainter {
     for (double x = 0; x <= size.width; x++) {
       // Hareket efekti: animationValue * 2 * pi
       double y = centerY + 50 * sin((x / 50) + (animationValue * 2 * pi));
-      if (x == 0) path.moveTo(x, y);
-      else path.lineTo(x, y);
+      if (x == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
     }
     canvas.drawPath(path, paint);
     
@@ -288,8 +291,11 @@ class SineWavePainter extends CustomPainter {
       final path2 = Path();
       for (double x = 0; x <= size.width; x++) {
         double y = centerY + 50 * cos((x / 50) + (animationValue * 2 * pi)); // Cos
-        if (x == 0) path2.moveTo(x, y);
-        else path2.lineTo(x, y);
+        if (x == 0) {
+          path2.moveTo(x, y);
+        } else {
+          path2.lineTo(x, y);
+        }
       }
       paint.color = Colors.blue.withValues(alpha: 0.1);
       canvas.drawPath(path2, paint);

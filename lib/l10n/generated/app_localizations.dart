@@ -801,6 +801,42 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'SİSTEM YÖNETİCİSİ'**
   String get rank15;
+
+  /// No description provided for @kbPinouts.
+  ///
+  /// In tr, this message translates to:
+  /// **'PINOUT ŞEMALARI'**
+  String get kbPinouts;
+
+  /// No description provided for @kbProtocols.
+  ///
+  /// In tr, this message translates to:
+  /// **'HABERLEŞME'**
+  String get kbProtocols;
+
+  /// No description provided for @kbCheatsheets.
+  ///
+  /// In tr, this message translates to:
+  /// **'PRATİK TABLOLAR'**
+  String get kbCheatsheets;
+
+  /// No description provided for @kbSymbols.
+  ///
+  /// In tr, this message translates to:
+  /// **'SEMBOLLER'**
+  String get kbSymbols;
+
+  /// No description provided for @kbComponents.
+  ///
+  /// In tr, this message translates to:
+  /// **'KOMPONENTLER'**
+  String get kbComponents;
+
+  /// No description provided for @kbTheory.
+  ///
+  /// In tr, this message translates to:
+  /// **'TEMEL TEORİ'**
+  String get kbTheory;
 }
 
 class _AppLocalizationsDelegate

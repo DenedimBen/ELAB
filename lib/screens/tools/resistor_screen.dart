@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:math';
+import 'package:flutter_application_1/l10n/generated/app_localizations.dart';
 
 class ResistorScreen extends StatefulWidget {
   const ResistorScreen({super.key});
@@ -8,351 +10,380 @@ class ResistorScreen extends StatefulWidget {
   State<ResistorScreen> createState() => _ResistorScreenState();
 }
 
-class _ResistorScreenState extends State<ResistorScreen> with SingleTickerProviderStateMixin {
+class _ResistorScreenState extends State<ResistorScreen> {
   // --- DURUM DEĞİŞKENLERİ ---
-  int bandCount = 4;
+  int _bandCount = 4;
+  int _selectedBandIndex = 0; // Şu an hangi bandı boyuyoruz?
 
-  int digit1 = 1; // Kahve
-  int digit2 = 0; // Siyah
-  int digit3 = 0; // Siyah
-  int multiplier = 2; // Kırmızı
-  int tolerance = 10; // Altın
-  int ppm = 1; // Kahve
+  // Renk Kodları (Varsayılan: 1k Ohm %5)
+  // 4 Bant: [Digit1, Digit2, Multiplier, Tolerance]
+  List<int> _bands = [1, 0, 2, 10]; 
 
-  // ANİMASYON KONTROLCÜSÜ
-  late AnimationController _animController;
-
-  @override
-  void initState() {
-    super.initState();
-    // Sonsuz döngüde çalışan animasyon (5 saniyede bir tur)
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
-  // RENK VERİTABANI
-  final List<Map<String, dynamic>> colors = [
-    {'name': 'Siyah',   'color': const Color(0xFF000000), 'val': 0, 'mult': 1.0, 'tol': null, 'ppm': 250},
-    {'name': 'Kahve',   'color': const Color(0xFF795548), 'val': 1, 'mult': 10.0, 'tol': 1.0, 'ppm': 100},
-    {'name': 'Kırmızı', 'color': const Color(0xFFF44336), 'val': 2, 'mult': 100.0, 'tol': 2.0, 'ppm': 50},
-    {'name': 'Turuncu', 'color': const Color(0xFFFF9800), 'val': 3, 'mult': 1000.0, 'tol': null, 'ppm': 15},
-    {'name': 'Sarı',    'color': const Color(0xFFFFEB3B), 'val': 4, 'mult': 10000.0, 'tol': null, 'ppm': 25},
-    {'name': 'Yeşil',   'color': const Color(0xFF4CAF50), 'val': 5, 'mult': 100000.0, 'tol': 0.5, 'ppm': 20},
-    {'name': 'Mavi',    'color': const Color(0xFF2196F3), 'val': 6, 'mult': 1000000.0, 'tol': 0.25, 'ppm': 10},
-    {'name': 'Mor',     'color': const Color(0xFF9C27B0), 'val': 7, 'mult': 10000000.0, 'tol': 0.1, 'ppm': 5},
-    {'name': 'Gri',     'color': const Color(0xFF9E9E9E), 'val': 8, 'mult': 0.0, 'tol': 0.05, 'ppm': 1},
-    {'name': 'Beyaz',   'color': const Color(0xFFFFFFFF), 'val': 9, 'mult': 0.0, 'tol': null, 'ppm': null},
-    {'name': 'Altın',   'color': const Color(0xFFFFD700), 'val': -1, 'mult': 0.1, 'tol': 5.0, 'ppm': null},
-    {'name': 'Gümüş',   'color': const Color(0xFFC0C0C0), 'val': -2, 'mult': 0.01, 'tol': 10.0, 'ppm': null},
+  // --- RENK VERİTABANI ---
+  final List<Map<String, dynamic>> _colorData = [
+    {'color': Colors.black, 'name': 'Siyah', 'val': 0, 'mult': 1.0},
+    {'color': const Color(0xFF795548), 'name': 'Kahve', 'val': 1, 'mult': 10.0},
+    {'color': const Color(0xFFD32F2F), 'name': 'Kırmızı', 'val': 2, 'mult': 100.0},
+    {'color': const Color(0xFFF57C00), 'name': 'Turuncu', 'val': 3, 'mult': 1000.0},
+    {'color': const Color(0xFFFBC02D), 'name': 'Sarı', 'val': 4, 'mult': 10000.0},
+    {'color': const Color(0xFF388E3C), 'name': 'Yeşil', 'val': 5, 'mult': 100000.0},
+    {'color': const Color(0xFF1976D2), 'name': 'Mavi', 'val': 6, 'mult': 1000000.0},
+    {'color': const Color(0xFF7B1FA2), 'name': 'Mor', 'val': 7, 'mult': 10000000.0},
+    {'color': const Color(0xFF616161), 'name': 'Gri', 'val': 8, 'mult': 0.0},
+    {'color': Colors.white, 'name': 'Beyaz', 'val': 9, 'mult': 0.0},
+    {'color': const Color(0xFFFFD700), 'name': 'Altın', 'val': -1, 'mult': 0.1},
+    {'color': const Color(0xFFC0C0C0), 'name': 'Gümüş', 'val': -2, 'mult': 0.01},
   ];
 
-  // --- HESAPLAMA MOTORU ---
-  String calculateResistance() {
-    double baseVal = 0;
-    if (bandCount == 4) {
-      baseVal = (colors[digit1]['val'] * 10 + colors[digit2]['val']).toDouble();
+  // --- HESAPLAMA ---
+  String _calculate() {
+    double value = 0;
+    double multiplier = 0;
+
+    if (_bandCount == 4) {
+      value = (_bands[0] * 10 + _bands[1]).toDouble();
+      multiplier = _getMult(_bands[2]);
     } else {
-      baseVal = (colors[digit1]['val'] * 100 + colors[digit2]['val'] * 10 + colors[digit3]['val']).toDouble();
+      value = (_bands[0] * 100 + _bands[1] * 10 + _bands[2]).toDouble();
+      multiplier = _getMult(_bands[3]);
     }
-    double totalOhms = baseVal * colors[multiplier]['mult'];
-    return _formatOhms(totalOhms);
+    return _formatOhms(value * multiplier);
+  }
+
+  double _getMult(int colorIdx) => _colorData[colorIdx]['mult'];
+
+  String _getTolerance() {
+    int idx = _bands.last;
+    if (idx == 1) return "±1%";
+    if (idx == 2) return "±2%";
+    if (idx == 10) return "±5%";
+    if (idx == 11) return "±10%";
+    return "±20%";
   }
 
   String _formatOhms(double ohms) {
-    if (ohms >= 1000000000) return "${(ohms / 1000000000).toStringAsFixed(2).replaceAll('.00', '')} GΩ";
-    if (ohms >= 1000000) return "${(ohms / 1000000).toStringAsFixed(2).replaceAll('.00', '')} MΩ";
-    if (ohms >= 1000) return "${(ohms / 1000).toStringAsFixed(2).replaceAll('.00', '')} kΩ";
-    return "${ohms.toStringAsFixed(2).replaceAll('.00', '')} Ω";
+    if (ohms >= 1e9) return "${(ohms / 1e9).toStringAsFixed(2)} GΩ";
+    if (ohms >= 1e6) return "${(ohms / 1e6).toStringAsFixed(2)} MΩ";
+    if (ohms >= 1e3) return "${(ohms / 1e3).toStringAsFixed(2)} kΩ";
+    return "${ohms.toStringAsFixed(2)} Ω";
   }
 
-  String getToleranceText() {
-    return "±${colors[tolerance]['tol']}%";
+  // --- ETKİLEŞİM ---
+  void _setBand(int colorIdx) {
+    setState(() {
+      _bands[_selectedBandIndex] = colorIdx;
+      // Otomatik bir sonraki banda geç (Kullanıcı dostu)
+      if (_selectedBandIndex < _bands.length - 2) {
+        _selectedBandIndex++;
+      }
+    });
   }
 
-  String getPPMText() {
-    if (bandCount != 6) return "";
-    var p = colors[ppm]['ppm'];
-    return p != null ? "$p ppm" : "";
+  void _changeMode(int count) {
+    setState(() {
+      _bandCount = count;
+      if (count == 5 && _bands.length == 4) _bands.insert(2, 0); // Araya siyah ekle
+      else if (count == 4 && _bands.length == 5) _bands.removeAt(2);
+      _selectedBandIndex = 0;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Arka plan rengi çarpan rengine göre hafif değişsin (Dinamik Atmosfer)
-    Color themeColor = colors[multiplier]['color'];
-    if (themeColor == Colors.black) themeColor = Colors.white; // Siyahsa beyaz yap
+    final text = AppLocalizations.of(context)!;
+    String result = _calculate();
+    String tol = _getTolerance();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2E3239),
-      body: Stack(
-        children: [
-          // 1. CANLI ARKA PLAN (SCIFI GRID)
-          AnimatedBuilder(
-            animation: _animController,
-            builder: (context, child) {
-              return CustomPaint(
-                size: Size.infinite,
-                painter: ResistorFlowPainter(
-                  animationValue: _animController.value,
-                  color: themeColor,
-                ),
-              );
-            },
-          ),
-
-          SafeArea(
-            child: Column(
+      backgroundColor: const Color(0xFF1E2126), // Ana Tema Rengi
+      appBar: AppBar(
+        title: Text(text.toolResistorCalc, style: GoogleFonts.orbitron(color: Colors.amber, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+        actions: [
+          // MOD SEÇİCİ (4/5 Bant)
+          Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(8)),
+            child: Row(
               children: [
-                // HEADER
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.grey),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const SizedBox(width: 10),
-                      Text("DİRENÇ HESAPLAYICI", style: GoogleFonts.orbitron(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 1)),
-                    ],
-                  ),
-                ),
-
-                // MOD SEÇİCİ
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(30), border: Border.all(color: Colors.white10)),
-                  child: Row(
-                    children: [4, 5, 6].map((bands) {
-                      bool isSelected = bandCount == bands;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => bandCount = bands),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.amber : Colors.transparent,
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: isSelected ? [BoxShadow(color: Colors.amber.withValues(alpha: 0.4), blurRadius: 10)] : []
-                            ),
-                            child: Text("$bands BANT", textAlign: TextAlign.center, style: TextStyle(color: isSelected ? Colors.black : Colors.grey, fontWeight: FontWeight.bold, fontSize: 12)),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // SONUÇ EKRANI
-                Column(
-                  children: [
-                    Text(calculateResistance(), style: GoogleFonts.shareTechMono(fontSize: 60, color: Colors.white, fontWeight: FontWeight.bold, shadows: [BoxShadow(color: themeColor.withValues(alpha: 0.5), blurRadius: 30)])),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(getToleranceText(), style: TextStyle(color: colors[tolerance]['color'], fontSize: 20, fontWeight: FontWeight.bold)),
-                        if (bandCount == 6) ...[
-                          const SizedBox(width: 15),
-                          Text(getPPMText(), style: const TextStyle(color: Colors.blueAccent, fontSize: 16)),
-                        ]
-                      ],
-                    )
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // DİRENÇ GÖRSELİ
-                Center(
-                  child: SizedBox(
-                    width: 320, height: 100,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(width: 320, height: 6, color: Colors.grey[600]),
-                        Container(
-                          width: 240, height: 70,
-                          decoration: BoxDecoration(
-                            color: bandCount > 4 ? const Color(0xFF81D4FA) : const Color(0xFFE0C9A6),
-                            borderRadius: BorderRadius.circular(35),
-                            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 10, offset: Offset(0, 5))],
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                              colors: bandCount > 4 ? [const Color(0xFFB3E5FC), const Color(0xFF0288D1)] : [const Color(0xFFF0E0C0), const Color(0xFF8D6E63)]
-                            )
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildResistorBand(colors[digit1]['color']),
-                            const SizedBox(width: 12),
-                            _buildResistorBand(colors[digit2]['color']),
-                            if (bandCount > 4) ...[const SizedBox(width: 12), _buildResistorBand(colors[digit3]['color'])],
-                            const SizedBox(width: 12),
-                            _buildResistorBand(colors[multiplier]['color']),
-                            const SizedBox(width: 25),
-                            _buildResistorBand(colors[tolerance]['color']),
-                            if (bandCount == 6) ...[const SizedBox(width: 12), _buildResistorBand(colors[ppm]['color'])],
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-
-                // SEÇİM PANELLERİ
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 30),
-                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF22252A),
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                      boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 20)]
-                    ),
-                    child: ListView(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      children: [
-                        _buildColorRow("1. BANT", digit1, (v) => setState(() => digit1 = v), limit: 9),
-                        _buildColorRow("2. BANT", digit2, (v) => setState(() => digit2 = v), limit: 9),
-                        if (bandCount > 4) _buildColorRow("3. BANT", digit3, (v) => setState(() => digit3 = v), limit: 9),
-                        _buildColorRow("ÇARPAN", multiplier, (v) => setState(() => multiplier = v), limit: 11),
-                        _buildColorRow("TOLERANS", tolerance, (v) => setState(() => tolerance = v), isTolerance: true),
-                        if (bandCount == 6) _buildColorRow("PPM (Temp)", ppm, (v) => setState(() => ppm = v), isPPM: true),
-                      ],
-                    ),
-                  ),
-                ),
+                _buildModeChip(4, "4 BANT"),
+                _buildModeChip(5, "5 BANT"),
               ],
             ),
-          ),
+          )
         ],
       ),
-    );
-  }
-
-  Widget _buildResistorBand(Color color) {
-    return Container(width: 12, height: 70, color: color);
-  }
-
-  Widget _buildColorRow(String title, int selectedIdx, Function(int) onSelect, {int limit = 12, bool isTolerance = false, bool isPPM = false}) {
-    List<int> validIndices = [];
-    if (isTolerance) {
-      validIndices = [1, 2, 5, 6, 7, 8, 10, 11];
-    } else if (isPPM) {
-      validIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    } else {
-      for (int i = 0; i <= limit; i++) validIndices.add(i);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 10, bottom: 8),
-            child: Text(title, style: TextStyle(color: Colors.grey[500], fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          // 1. DİRENÇ GÖRSELİ (BÜYÜK VE NET)
+          Expanded(
+            flex: 4,
+            child: Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF25282F),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
+                border: Border.all(color: Colors.white10),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // DİRENÇ ÇİZİMİ
+                  SizedBox(
+                    height: 120,
+                    width: double.infinity,
+                    child: CustomPaint(
+                      painter: CleanResistorPainter(bands: _bands, colors: _colorData.map((e) => e['color'] as Color).toList()),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  // SONUÇ METNİ
+                  Column(
+                    children: [
+                      Text(text.commonResult, style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 2)),
+                      const SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(result, style: GoogleFonts.robotoMono(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 10),
+                          Text(tol, style: GoogleFonts.robotoMono(fontSize: 24, color: Colors.amber)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
+
+          // 2. BANT SEÇİM SEKMELERİ (TABS)
           SizedBox(
-            height: 60,
+            height: 50,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: validIndices.length,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: _bands.length,
               itemBuilder: (context, index) {
-                int colorIdx = validIndices[index];
-                bool isSelected = selectedIdx == colorIdx;
-                bool isWhite = colors[colorIdx]['color'] == const Color(0xFFFFFFFF);
+                bool isSelected = _selectedBandIndex == index;
+                String label = "${index + 1}. Bant";
+                if (index == _bands.length - 1) label = "Tolerans";
+                else if (index == _bands.length - 2) label = "Çarpan";
 
                 return GestureDetector(
-                  onTap: () => onSelect(colorIdx),
+                  onTap: () => setState(() => _selectedBandIndex = index),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 35, height: 35,
-                          decoration: BoxDecoration(
-                            color: colors[colorIdx]['color'],
-                            shape: BoxShape.circle,
-                            border: isSelected ? Border.all(color: Colors.white, width: 2) : (isWhite ? Border.all(color: Colors.grey) : null),
-                            boxShadow: isSelected ? [BoxShadow(color: colors[colorIdx]['color'].withValues(alpha: 0.6), blurRadius: 10)] : []
-                          ),
-                          child: isSelected ? const Icon(Icons.check, size: 20, color: Colors.grey) : null,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          colors[colorIdx]['name'],
-                          style: TextStyle(color: isSelected ? Colors.amber : Colors.grey[600], fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
-                        )
-                      ],
+                    alignment: Alignment.center,
+                    margin: const EdgeInsets.only(right: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.amber : Colors.transparent,
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(color: isSelected ? Colors.amber : Colors.grey, width: 1.5),
+                    ),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: isSelected ? Colors.black : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 );
               },
             ),
           ),
+
+          const SizedBox(height: 20),
+
+          // 3. RENK KLAVYESİ (İSİMLİ VE BÜYÜK)
+          Expanded(
+            flex: 5,
+            child: Container(
+              padding: const EdgeInsets.all(15),
+              decoration: const BoxDecoration(
+                color: Color(0xFF181A1F),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4, // Yan yana 4 tane
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.8, // Kutuyu biraz uzattık ki yazı sığsın
+                ),
+                itemCount: _colorData.length,
+                itemBuilder: (context, index) {
+                  final colorInfo = _colorData[index];
+                  bool isDisabled = _isColorDisabled(index);
+                  bool isSelected = _bands[_selectedBandIndex] == index;
+                  
+                  return GestureDetector(
+                    onTap: isDisabled ? null : () => _setBand(index),
+                    child: Opacity(
+                      opacity: isDisabled ? 0.3 : 1.0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF25282F), // Her kutunun kendi arka planı olsun
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: isSelected ? Colors.amber : Colors.transparent, 
+                            width: 2
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // RENK DAİRESİ
+                            Container(
+                              width: 35, 
+                              height: 35,
+                              decoration: BoxDecoration(
+                                color: colorInfo['color'],
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white24, width: 1),
+                                boxShadow: [
+                                  if (!isDisabled) 
+                                    BoxShadow(color: (colorInfo['color'] as Color).withValues(alpha: 0.5), blurRadius: 8)
+                                ]
+                              ),
+                              child: isSelected 
+                                ? const Icon(Icons.check, color: Colors.white, size: 20) // Renk koyuysa ikon beyaz
+                                : null,
+                            ),
+                            
+                            const SizedBox(height: 8),
+                            
+                            // RENK İSMİ
+                            Text(
+                              colorInfo['name'],
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.grey,
+                                fontSize: 11,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+
+  Widget _buildModeChip(int count, String label) {
+    bool active = _bandCount == count;
+    return GestureDetector(
+      onTap: () => _changeMode(count),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? Colors.amber : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: active ? Colors.black : Colors.white)),
+      ),
+    );
+  }
+
+  bool _isColorDisabled(int idx) {
+    // Tolerans bandında sadece belirli renkler olur
+    if (_selectedBandIndex == _bands.length - 1) {
+      return ![1, 2, 5, 6, 7, 8, 10, 11].contains(idx);
+    }
+    // 1. Bant Siyah olamaz
+    if (_selectedBandIndex == 0 && idx == 0) return true;
+    
+    // Altın/Gümüş sadece çarpan ve toleransta olur
+    if (_selectedBandIndex < _bands.length - 2 && idx >= 10) return true;
+    
+    return false;
+  }
 }
 
-// --- SCIFI BACKGROUND PAINTER (AKIŞKAN IZGARA) ---
-class ResistorFlowPainter extends CustomPainter {
-  final double animationValue;
-  final Color color;
-  
-  ResistorFlowPainter({required this.animationValue, required this.color});
+// --- TEMİZ VE NET DİRENÇ RESSAMI (DÜZELTİLMİŞ) ---
+class CleanResistorPainter extends CustomPainter {
+  final List<int> bands;
+  final List<Color> colors;
+  CleanResistorPainter({required this.bands, required this.colors});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withValues(alpha: 0.1)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
+    final paint = Paint()..style = PaintingStyle.fill;
+    double w = size.width;
+    double h = size.height;
+    
+    // 1. TEL (Wire) - En alta çiziyoruz
+    paint.color = Colors.grey;
+    paint.strokeWidth = 8;
+    canvas.drawLine(Offset(0, h/2), Offset(w, h/2), paint);
 
-    final glowPaint = Paint()
-      ..color = color.withValues(alpha: 0.3)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+    // 2. GÖVDE (Body)
+    final bodyRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset(w/2, h/2), width: w * 0.8, height: h * 0.65), // Gövdeyi biraz genişlettim
+      const Radius.circular(25), // Köşeleri biraz daha yumuşattım
+    );
+    
+    // 3D Bej Efekti
+    paint.shader = const LinearGradient(
+      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+      colors: [Color(0xFFE0C097), Color(0xFFBCAAA4), Color(0xFF8D6E63)] 
+    ).createShader(bodyRect.outerRect);
+    
+    canvas.drawRRect(bodyRect, paint);
+    paint.shader = null; 
 
-    const double gridSize = 40.0;
+    // --- MASKELEME (CLIPPING) ---
+    // Burası çok önemli: Bantları çizmeden önce alanı gövdeyle sınırlıyoruz.
+    // Böylece bantlar asla gövdeden dışarı taşamaz.
+    canvas.save(); 
+    canvas.clipRRect(bodyRect); 
 
-    // Hareketli Dikey Çizgiler
-    for (double x = 0; x <= size.width; x += gridSize) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
+    // 3. BANTLAR
+    // Hesaplama: Gövdenin solundan başla, sağa doğru git
+    double bodyWidth = bodyRect.width;
+    double startX = (w - bodyWidth) / 2; // Gövdenin sol kenarı
+    
+    // Bantları gövdenin içine orantılı dağıt
+    // (bodyWidth * 0.2) diyerek kenarlardan %20 boşluk bıraktık
+    double drawingArea = bodyWidth * 0.7; 
+    double marginLeft = bodyWidth * 0.15; 
+    double spacing = drawingArea / (bands.length - 1); 
 
-    // Hareketli Yatay Çizgiler (Aşağı Doğru Akıyor)
-    // animationValue 0'dan 1'e gider. Bunu pixel offset'e çeviriyoruz.
-    double offsetY = animationValue * gridSize; 
-
-    for (double y = -gridSize; y <= size.height; y += gridSize) {
-      // Tarama Efekti: Ekranın ortasında daha parlak
-      double drawY = y + offsetY;
+    for (int i = 0; i < bands.length; i++) {
+      paint.color = colors[bands[i]];
       
-      // Eğer çizgi ekranın ortasına yakınsa parlat
-      if (drawY > size.height * 0.3 && drawY < size.height * 0.6) {
-        canvas.drawLine(Offset(0, drawY), Offset(size.width, drawY), glowPaint);
-      } else {
-        canvas.drawLine(Offset(0, drawY), Offset(size.width, drawY), paint);
+      double x = startX + marginLeft + (i * spacing);
+      
+      // Tolerans bandı (Son bant) her zaman biraz daha ayrık ve sağda durmalı
+      if (i == bands.length - 1) {
+         x = startX + bodyWidth - (bodyWidth * 0.15); // Sağ kenardan %15 içeride
       }
+
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset(x, h/2), width: 12, height: h * 0.8), // Yükseklik gövdeden büyük olsa bile clip sayesinde kesilir
+        paint
+      );
     }
+    
+    canvas.restore(); // Maskelemeyi bitir
   }
+
   @override
-  bool shouldRepaint(covariant ResistorFlowPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

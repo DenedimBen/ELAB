@@ -144,5 +144,11 @@
   "rank12": "Yapay Zeka Çekirdeği",
   "rank13": "Tekillik",
   "rank14": "E-LAB EFSANESİ",
-  "rank15": "SİSTEM YÖNETİCİSİ"
+  "rank15": "SİSTEM YÖNETİCİSİ",
+  "kbPinouts": "PINOUT ŞEMALARI",
+  "kbProtocols": "HABERLEŞME",
+  "kbCheatsheets": "PRATİK TABLOLAR",
+  "kbSymbols": "SEMBOLLER",
+  "kbComponents": "KOMPONENTLER",
+  "kbTheory": "TEMEL TEORİ"
 }

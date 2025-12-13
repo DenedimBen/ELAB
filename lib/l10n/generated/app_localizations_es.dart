@@ -372,4 +372,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rank15 => 'SİSTEM YÖNETİCİSİ';
+
+  @override
+  String get kbPinouts => 'PINOUT ŞEMALARI';
+
+  @override
+  String get kbProtocols => 'HABERLEŞME';
+
+  @override
+  String get kbCheatsheets => 'PRATİK TABLOLAR';
+
+  @override
+  String get kbSymbols => 'SEMBOLLER';
+
+  @override
+  String get kbComponents => 'KOMPONENTLER';
+
+  @override
+  String get kbTheory => 'TEMEL TEORİ';
 }

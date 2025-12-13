@@ -278,7 +278,9 @@ class CircuitFlowPainter extends CustomPainter {
     
     // Yatay Izgara (Süs)
     final gridPaint = Paint()..color = Colors.white.withValues(alpha: 0.02)..strokeWidth = 1;
-    for(double y=0; y<size.height; y+=40) canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    for(double y=0; y<size.height; y+=40) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    }
   }
   @override
   bool shouldRepaint(covariant CircuitFlowPainter oldDelegate) => true;

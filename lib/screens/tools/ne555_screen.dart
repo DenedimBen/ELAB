@@ -499,13 +499,17 @@ class ScopeGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white10..strokeWidth = 1;
-    for(double x=0; x<=size.width; x+=size.width/5) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for(double y=0; y<=size.height; y+=size.height/3) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for(double x=0; x<=size.width; x+=size.width/5) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for(double y=0; y<=size.height; y+=size.height/3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
     
     final axisPaint = Paint()..color = Colors.white24..strokeWidth = 1.5;
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), axisPaint); // GND
     _drawText(canvas, "GND", Offset(5, size.height - 15), Colors.white30);
-    _drawText(canvas, "Vcc", Offset(5, 5), Colors.white30);
+    _drawText(canvas, "Vcc", const Offset(5, 5), Colors.white30);
   }
   void _drawText(Canvas c, String text, Offset pos, Color color) {
     final textSpan = TextSpan(text: text, style: TextStyle(color: color, fontSize: 10));

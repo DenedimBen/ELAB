@@ -112,7 +112,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            color: Colors.blueAccent.withOpacity(0.1), // Hafif mavi zemin
+            color: Colors.blueAccent.withValues(alpha: 0.1), // Hafif mavi zemin
             child: Row(
               children: [
                 const Icon(Icons.info_outline, color: Colors.blueAccent),
@@ -157,9 +157,9 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
                     top: 10, right: 10,
                     child: FloatingActionButton.small(
                       heroTag: "btn2",
-                      backgroundColor: Colors.blueGrey.withOpacity(0.5),
-                      child: const Icon(Icons.refresh, color: Colors.white),
+                      backgroundColor: Colors.blueGrey.withValues(alpha: 0.5),
                       onPressed: _restartTest,
+                      child: const Icon(Icons.refresh, color: Colors.white),
                     ),
                   ),
                 ],
@@ -228,7 +228,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
                               step.expectedValue,
                               style: GoogleFonts.vt323(
                                 fontSize: 50, // Başlangıç boyutu
-                                color: Colors.black.withOpacity(0.85),
+                                color: Colors.black.withValues(alpha: 0.85),
                                 fontWeight: FontWeight.w500,
                                 shadows: [
                                   const Shadow(color: Colors.black12, offset: Offset(2, 2), blurRadius: 1)
@@ -260,7 +260,7 @@ class _ComponentTestScreenState extends State<ComponentTestScreen> {
                       width: 50, height: 150,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.white.withOpacity(0.1), Colors.transparent],
+                          colors: [Colors.white.withValues(alpha: 0.1), Colors.transparent],
                           begin: Alignment.topRight,
                           end: Alignment.bottomLeft
                         )

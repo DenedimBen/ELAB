@@ -46,8 +46,8 @@ class _LedScreenState extends State<LedScreen> {
     if (sourceVoltage <= vf) return "-";
     
     // P = I^2 * R  veya  P = V_r * I
-    double v_r = sourceVoltage - vf;
-    double p = v_r * (ledCurrent / 1000.0);
+    double vR = sourceVoltage - vf;
+    double p = vR * (ledCurrent / 1000.0);
     
     return "${(p * 1000).toStringAsFixed(0)} mW"; // Miliwatt
   }
@@ -239,8 +239,12 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white.withValues(alpha: 0.03)..strokeWidth = 1;
     const double step = 40.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;

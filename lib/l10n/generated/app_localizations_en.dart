@@ -370,4 +370,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rank15 => 'SYSTEM ADMIN';
+
+  @override
+  String get kbPinouts => 'PINOUT DIAGRAMS';
+
+  @override
+  String get kbProtocols => 'COMMUNICATION';
+
+  @override
+  String get kbCheatsheets => 'CHEATSHEETS';
+
+  @override
+  String get kbSymbols => 'SYMBOLS';
+
+  @override
+  String get kbComponents => 'COMPONENTS';
+
+  @override
+  String get kbTheory => 'BASIC THEORY';
 }

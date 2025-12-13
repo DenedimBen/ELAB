@@ -41,8 +41,9 @@ class ComponentDetailScreen extends StatelessWidget {
     String appsRaw = componentData['applications'] ?? '';
     if (appsRaw.isEmpty || appsRaw == 'nan') {
        // Kategoriye göre otomatik doldur (Yedek Plan)
-       if (category.contains('MOSFET')) appsRaw = "Motor Control, SMPS, DC-DC Converter, Load Switch";
-       else if (category.contains('BJT')) appsRaw = "Audio Amplifier, Signal Processing, Switching";
+       if (category.contains('MOSFET')) {
+         appsRaw = "Motor Control, SMPS, DC-DC Converter, Load Switch";
+       } else if (category.contains('BJT')) appsRaw = "Audio Amplifier, Signal Processing, Switching";
        else appsRaw = "General Purpose, Prototyping, PCB Design";
     }
 
@@ -63,11 +64,11 @@ class ComponentDetailScreen extends StatelessWidget {
                   centerTitle: true,
                   title: Text(id, style: GoogleFonts.orbitron(color: Colors.white, fontWeight: FontWeight.bold, shadows: [const Shadow(color: Colors.black, blurRadius: 10)])),
                   background: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [const Color(0xFF2E3239), const Color(0xFF121418)],
+                        colors: [Color(0xFF2E3239), Color(0xFF121418)],
                       ),
                     ),
                     child: Center(
@@ -190,7 +191,7 @@ class ComponentDetailScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(6),
                             elevation: 4,
                             pressElevation: 8,
-                            shadowColor: Colors.amber.withOpacity(0.5),
+                            shadowColor: Colors.amber.withValues(alpha: 0.5),
                             
                             // TIKLAMA OLAYI: DEVRE ŞEMASI ARA 🔍
                             onPressed: () async {
@@ -219,7 +220,7 @@ class ComponentDetailScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(15),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: Colors.white10),
                         ),
@@ -285,7 +286,7 @@ class ComponentDetailScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [Colors.black, Colors.black.withOpacity(0.8), Colors.transparent],
+                  colors: [Colors.black, Colors.black.withValues(alpha: 0.8), Colors.transparent],
                 ),
               ),
               child: Column(
@@ -316,7 +317,7 @@ class ComponentDetailScreen extends StatelessWidget {
                           foregroundColor: Colors.black,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                           elevation: 10,
-                          shadowColor: Colors.amber.withOpacity(0.5),
+                          shadowColor: Colors.amber.withValues(alpha: 0.5),
                         ),
                         icon: const Icon(Icons.health_and_safety, size: 28),
                         label: Text("START DIAGNOSTIC TEST", style: GoogleFonts.oswald(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -347,8 +348,8 @@ class ComponentDetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1E2126),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5))],
       ),
       child: Column(
         children: [
@@ -366,9 +367,9 @@ class ComponentDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold)),
     );
@@ -430,8 +431,8 @@ class ComponentDetailScreen extends StatelessWidget {
 
   // --- HATA BİLDİRİM PENCERESİ (GÜNCELLENDİ) ---
   void _showReportDialog(BuildContext context, String componentId) {
-    final TextEditingController _controller = TextEditingController();
-    String _selectedReason = "Yanlış Değer"; // Varsayılan
+    final TextEditingController controller = TextEditingController();
+    String selectedReason = "Yanlış Değer"; // Varsayılan
 
     showDialog(
       context: context,
@@ -463,7 +464,7 @@ class ComponentDetailScreen extends StatelessWidget {
                       
                       // Sebep Seçimi
                       DropdownButtonFormField<String>(
-                        value: _selectedReason,
+                        initialValue: selectedReason,
                         dropdownColor: const Color(0xFF353A40),
                         style: const TextStyle(color: Colors.white),
                         decoration: const InputDecoration(
@@ -481,14 +482,14 @@ class ComponentDetailScreen extends StatelessWidget {
                           DropdownMenuItem(value: "Görsel Hatası", child: Text("Resim/Kılıf Yanlış")),
                           DropdownMenuItem(value: "Diğer", child: Text("Diğer")),
                         ],
-                        onChanged: (val) => setState(() => _selectedReason = val!),
+                        onChanged: (val) => setState(() => selectedReason = val!),
                       ),
                       
                       const SizedBox(height: 15),
 
                       // Açıklama
                       TextField(
-                        controller: _controller,
+                        controller: controller,
                         style: const TextStyle(color: Colors.white),
                         maxLines: 3,
                         decoration: const InputDecoration(
@@ -526,8 +527,8 @@ class ComponentDetailScreen extends StatelessWidget {
                     // Firebase'e kaydet
                     await FirestoreService().submitReport(
                       componentId, 
-                      _selectedReason, 
-                      _controller.text
+                      selectedReason, 
+                      controller.text
                     );
 
                     ScaffoldMessenger.of(context).showSnackBar(

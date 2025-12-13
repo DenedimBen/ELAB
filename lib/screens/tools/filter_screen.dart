@@ -309,13 +309,13 @@ class BodePlotPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color..strokeWidth = 3..style = PaintingStyle.stroke;
     final axisPaint = Paint()..color = Colors.white30..strokeWidth = 1;
-    final textStyle = const TextStyle(color: Colors.white54, fontSize: 10);
+    const textStyle = TextStyle(color: Colors.white54, fontSize: 10);
 
     // Eksenleri Çiz
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), axisPaint); 
-    canvas.drawLine(Offset(0, 0), Offset(0, size.height), axisPaint); 
+    canvas.drawLine(const Offset(0, 0), Offset(0, size.height), axisPaint); 
 
-    _drawText(canvas, "0dB", Offset(-25, 0), textStyle);
+    _drawText(canvas, "0dB", const Offset(-25, 0), textStyle);
     _drawText(canvas, "-3dB", Offset(-25, size.height * 0.2), textStyle);
     _drawText(canvas, "Freq", Offset(size.width - 30, size.height + 5), textStyle);
 

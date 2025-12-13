@@ -159,8 +159,8 @@ class _CapacitorChargeScreenState extends State<CapacitorChargeScreen> with Sing
                                 border: Border.all(color: isCharging ? Colors.green : Colors.white10),
                                 boxShadow: isCharging ? [BoxShadow(color: Colors.green.withValues(alpha: 0.2), blurRadius: 10)] : []
                               ),
-                              child: Column(
-                                children: const [
+                              child: const Column(
+                                children: [
                                   Icon(Icons.battery_charging_full, color: Colors.green),
                                   SizedBox(height: 5),
                                   Text("ŞARJ ET", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -182,8 +182,8 @@ class _CapacitorChargeScreenState extends State<CapacitorChargeScreen> with Sing
                                 border: Border.all(color: !isCharging ? Colors.red : Colors.white10),
                                 boxShadow: !isCharging ? [BoxShadow(color: Colors.red.withValues(alpha: 0.2), blurRadius: 10)] : []
                               ),
-                              child: Column(
-                                children: const [
+                              child: const Column(
+                                children: [
                                   Icon(Icons.battery_alert, color: Colors.red), // Deşarj ikonu
                                   SizedBox(height: 5),
                                   Text("DEŞARJ ET", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -290,8 +290,11 @@ class CurvePainter extends CustomPainter {
         yVal = size.height - (normalizedV * size.height * 0.9);
       }
 
-      if (x == 0) path.moveTo(x, yVal);
-      else path.lineTo(x, yVal);
+      if (x == 0) {
+        path.moveTo(x, yVal);
+      } else {
+        path.lineTo(x, yVal);
+      }
     }
 
     // Glow Efekti (Çizginin arkasına bulanık kalın çizgi)
@@ -319,14 +322,18 @@ class ScopeGridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white10..strokeWidth = 1;
     // Dikey Çizgiler
-    for(double x=0; x<=size.width; x+=size.width/10) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    for(double x=0; x<=size.width; x+=size.width/10) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
     // Yatay Çizgiler
-    for(double y=0; y<=size.height; y+=size.height/5) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for(double y=0; y<=size.height; y+=size.height/5) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
     
     // Orta Eksenler
     final axisPaint = Paint()..color = Colors.white24..strokeWidth = 1.5;
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), axisPaint); // X Ekseni
-    canvas.drawLine(Offset(0, 0), Offset(0, size.height), axisPaint); // Y Ekseni
+    canvas.drawLine(const Offset(0, 0), Offset(0, size.height), axisPaint); // Y Ekseni
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
@@ -337,8 +344,12 @@ class GridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.white.withValues(alpha: 0.03)..strokeWidth = 1;
     const double step = 40.0;
-    for (double x = 0; x < size.width; x += step) canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    for (double y = 0; y < size.height; y += step) canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;

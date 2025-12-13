@@ -11,8 +11,7 @@ import 'package:flutter_application_1/screens/tools/tools_screen.dart';
 import 'package:flutter_application_1/screens/knowledge/knowledge_screen.dart';
 import 'package:flutter_application_1/screens/smd/smd_screen.dart';
 import 'package:flutter_application_1/screens/home/favorites_screen.dart';
-import 'package:flutter_application_1/models/component_model.dart'; // ComponentModel için
-import 'package:flutter_application_1/screens/component_detail_screen.dart'; // Detay ekranı için
+import 'package:flutter_application_1/screens/knowledge/dev_boards_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -57,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: const LinearGradient(colors: [Colors.amber, Colors.deepOrange]),
-                              boxShadow: [BoxShadow(color: Colors.amber.withOpacity(0.5), blurRadius: 10)]
+                              boxShadow: [BoxShadow(color: Colors.amber.withValues(alpha: 0.5), blurRadius: 10)]
                             ),
                             child: CircleAvatar(
                               radius: 18,
@@ -86,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(colors: [Color(0xFFC0392B), Color(0xFF8E44AD)]),
                     borderRadius: BorderRadius.circular(15),
-                    boxShadow: [BoxShadow(color: Colors.purpleAccent.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+                    boxShadow: [BoxShadow(color: Colors.purpleAccent.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5))],
                   ),
                   child: Row(
                     children: [
@@ -147,6 +146,16 @@ class HomeScreen extends StatelessWidget {
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const KnowledgeScreen())),
                   ),
 
+                  // GELİŞTİRME KARTLARI
+                  _buildMenuCard(
+                    context,
+                    title: "GELİŞTİRME KARTLARI",
+                    subtitle: "Arduino & ESP",
+                    icon: Icons.developer_board,
+                    color: const Color(0xFF00E5FF),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DevBoardsScreen())),
+                  ),
+
                   // SMD KODLARI
                   _buildMenuCard(
                     context,
@@ -184,8 +193,8 @@ class HomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF2B2E36),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))],
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +203,7 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 28),

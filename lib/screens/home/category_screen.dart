@@ -13,7 +13,7 @@ class CategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String _packageImagePath(String packageId) {
+    String packageImagePath(String packageId) {
       final key = packageId.trim().toLowerCase();
       final map = {
         'to-220': 'assets/packages/to-220.png',
@@ -79,7 +79,7 @@ class CategoryScreen extends StatelessWidget {
                 children: [
                   Hero(
                     tag: comp.id,
-                    child: Image.asset(_packageImagePath(comp.packageId), height: 40, errorBuilder: (c, e, s) => const Icon(Icons.memory, color: Colors.grey)),
+                    child: Image.asset(packageImagePath(comp.packageId), height: 40, errorBuilder: (c, e, s) => const Icon(Icons.memory, color: Colors.grey)),
                   ),
                   const SizedBox(width: 15),
                   Column(

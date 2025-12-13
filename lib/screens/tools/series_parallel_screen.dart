@@ -68,7 +68,9 @@ class _SeriesParallelScreenState extends State<SeriesParallelScreen> with Single
 
     if (isSeries) {
       // SERİ: R_t = R1 + R2 + ...
-      for (var r in ohmValues) total += r;
+      for (var r in ohmValues) {
+        total += r;
+      }
     } else {
       // PARALEL: 1/R_t = 1/R1 + 1/R2 + ...
       double denominator = 0;

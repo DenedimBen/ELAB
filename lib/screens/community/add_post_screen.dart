@@ -18,7 +18,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   File? _selectedImage;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   // Resim Seçme Fonksiyonu
   Future<void> _pickImage() async {
@@ -166,7 +166,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
                   hintText: "Detayları buraya yazın...",
-                  hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
+                  hintStyle: TextStyle(color: Colors.grey.withValues(alpha: 0.5)),
                   border: InputBorder.none,
                   filled: true,
                   fillColor: Colors.black12,

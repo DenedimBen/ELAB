@@ -58,11 +58,11 @@ dependencies:
   google_nav_bar: ^5.0.6    # Modern alt navigasyon
 
   # Firebase ve Cloud Paketi
-  firebase_core: ^2.27.0      # Firebase Beyni
-  firebase_auth: ^4.17.8      # Giriş/Çıkış İşlemleri
+  firebase_core: ^3.0.0      # Firebase Beyni
+  firebase_auth: ^5.0.0      # Giriş/Çıkış İşlemleri
   google_sign_in: ^6.2.1      # Google Butonu Mantığı
-  cloud_firestore: ^4.15.8    # Veritabanı (Favoriler ve Topluluk için)
-  firebase_storage: ^11.6.9   # Dosya yükleme
+  cloud_firestore: ^5.0.0    # Veritabanı (Favoriler ve Topluluk için)
+  firebase_storage: ^12.0.0   # Dosya yükleme
   image_picker: ^1.0.7        # Galeriden resim seçme
   
   # Forum Performans ve UI Paketleri
@@ -72,6 +72,11 @@ dependencies:
   # Localization ve I18n
   url_launcher: ^6.3.2
   share_plus: ^10.0.0
+  syncfusion_flutter_pdfviewer: ^31.2.18  # En güncel ve hatasız sürüm
+  path_provider: ^2.1.2 # Geçici dosya oluşturmak için
+
+dependency_overrides:
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +96,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/pinouts/
+    - assets/protocols/
+    - assets/tables/
+    - assets/symbols/
     - assets/packages/
     - assets/animations/
     - assets/db/
@@ -117,11 +126,10 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/app_icon.png" 
-  min_sdk_android: 21 
-  # Android 8+ için Adaptive Icon (İsteğe bağlı ama önerilir)
-  adaptive_icon_background: "#1E2126" # Bizim koyu tema rengimiz
-  adaptive_icon_foreground: "assets/images/splash_logo.png" # Şeffaf logo buraya da uyar
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#1E2126" # Arka plan rengin
+  adaptive_icon_foreground: "assets/images/app_icon.png"
 
 # --- 2. AÇILIŞ EKRANI (SPLASH) AYARLARI ---
 flutter_native_splash:
